@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { validateRegistrationData } from "../utils/auth.helper";
+import { checkOtpRestrictions, sendOtp, trackOtpRequests, validateRegistrationData } from "../utils/auth.helper";
 import prisma from "../../../../packages/libs/prisma";
 import { ValidationError } from "../../../../packages/error-handler";
 
@@ -11,7 +11,9 @@ try {
     if(exisitingUser){
         return next(new ValidationError("user already exists with email"));
     }
-    
+    await checkOtpRestrictions(email,next);
+    await trackOtpRequests(email,next);
+    await sendOtp(email,name,"user-activation-mail");
     res.status(200).json({message:"OTP sent to mail. Please verify your account"});
 } catch (error) {
     return next(error);
