@@ -21,7 +21,7 @@ type PasswordFormData = {
 const ForgotPasswordPage = () => {
   const [serverError, setServerError] = useState<string | null>(null);
   const [step, setStep] = useState<'email' | 'otp' | 'reset'>('email');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '',]);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [canResend, setCanResend] = useState(true);
   const [timer, setTimer] = useState(60);
@@ -106,7 +106,7 @@ const ForgotPasswordPage = () => {
       if (!password) return;
       const response = await axiosInstance.post('/reset-password-user', {
         email: userEmail,
-        password,
+        newPassword: password,
       });
       return response.data;
     },
