@@ -31,6 +31,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-hook-form": "^7.59.0",
+    "sonner": "^2.0.5",
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.1"
   },

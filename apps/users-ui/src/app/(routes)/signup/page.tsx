@@ -20,7 +20,7 @@ const SignupPage = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [canResend, setCanResend] = useState(true);
   const [timer, setTimer] = useState(60);
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '',]);
   const [userData, setUserData] = useState<FormData | null>(null);
   const [showOTP, setShowOTP] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -113,16 +113,18 @@ const SignupPage = () => {
       </p>
       <div className="w-full flex justify-center">
         <div className="md:w-[480px] p-8 bg-white shadow rounded-lg">
+
           <h3 className="text-3xl font-semibold text-center mb-2">
-            Register to Eshop
+            Register to EComm
           </h3>
 
           <GoogleButton />
           <div className="flex items-center my-5 text-gray-400 text-sm">
             <div className="flex-1 border-t border-gray-300" />
-            <span className="px-3">or Sign up with Email</span>
+              <span className="px-3">or Sign up with Email</span>
             <div className="flex-1 border-t border-gray-300" />
           </div>
+
           {!showOTP ? (
             <div>
               <form onSubmit={handleSubmit(onSubmit)}>
@@ -147,6 +149,7 @@ const SignupPage = () => {
                     {String(errors.name.message)}
                   </p>
                 )}
+
                 <label htmlFor="email" className="block text-gray-700 mb-1">
                   Email
                 </label>
@@ -168,6 +171,7 @@ const SignupPage = () => {
                     {String(errors.email.message)}
                   </p>
                 )}
+                
                 <label htmlFor="password" className="block text-gray-700 mb-1">
                   Password
                 </label>
@@ -198,6 +202,7 @@ const SignupPage = () => {
                     {String(errors.password.message)}
                   </p>
                 )}
+
                 <button
                   type="submit"
                   disabled={signupMutation.isPending}
@@ -217,6 +222,7 @@ const SignupPage = () => {
                     </p>
                   )}
               </form>
+
               <p className="text-center text-gray-500 my-4">
                 Already have an account?{' '}
                 <Link href="/login" className="text-blue-500">
@@ -229,6 +235,7 @@ const SignupPage = () => {
               <h3 className="text-xl font-semibold text-center mb-4">
                 Enter OTP
               </h3>
+
               <div className="flex justify-center gap-6">
                 {otp?.map((digit, index) => (
                   <input
@@ -245,6 +252,7 @@ const SignupPage = () => {
                   />
                 ))}
               </div>
+
               <button
                 className="w-full mt-4 text-lg cursor-pointer bg-blue-500 text-white py-2 rounded-lg flex items-center justify-center"
                 disabled={verifyOTPMutation.isPending}
@@ -256,6 +264,7 @@ const SignupPage = () => {
                   'Verify OTP'
                 )}
               </button>
+              
               <p className="text-center text-sm mt-4">
                 {canResend ? (
                   <button
