@@ -1,10 +1,13 @@
+"use client";
 import Link from 'next/link';
 import React from 'react'
 import { Heart, Search, ShoppingCart, User } from 'lucide-react';
 import Logo from 'apps/users-ui/src/assets/Logo';
 import HeaderBottom from './header-bottom';
+import useUser from 'apps/users-ui/src/hooks/useUser';
 
 const Header = () => {
+  const { user, isLoading } = useUser();
   return (
     <header className="w-full bg-white">
       <div className="w-[80%] py-5 m-auto flex items-center justify-between">
@@ -29,7 +32,18 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-8">
-          
+          {/* User Icon */}
+          {!isLoading && user ? (
+            <Link href="/profile" className="flex items-center gap-2">
+              <div className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]">
+                <User />
+              </div>
+              <div>
+                <span className="block font-medium">Hello,</span>
+                <span className="font-semibold capitalize">{user.name.split(' ')[0]}</span>
+              </div>
+            </Link>
+          ) : (
             <Link href="/login" className="flex items-center gap-2">
               <div className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]">
                 <User />
@@ -37,10 +51,12 @@ const Header = () => {
               <div>
                 <span className="block font-medium">Hello,</span>
                 <span className="font-semibold">
-                  sign in 
+                  {isLoading ? '...' : 'Sign In'}
                 </span>
               </div>
             </Link>
+          )}
+
          
           {/* Wishlist Icon */}
           <div className="flex items-center gap-5">
