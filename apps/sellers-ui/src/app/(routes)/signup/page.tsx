@@ -8,11 +8,12 @@ import { useForm } from 'react-hook-form'
 import axios, { AxiosError } from "axios"
 import { countries } from 'apps/sellers-ui/src/constants/Countries';
 import CreateShop from 'apps/sellers-ui/src/shared/components/CreateShop';
+import Image from 'next/image';
 
 
 
 const Signup = () => {
-    const [activeStep, setActiveStep] = useState(1)
+    const [activeStep, setActiveStep] = useState(3);
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [canResend, setCanResend] = useState(true);
     const [timer, setTimer] = useState(60);
@@ -98,7 +99,12 @@ const Signup = () => {
 
     const connectStripe = async () => {
         try {
-            
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/create-stripe-link`, { sellerId });
+
+            if (response.data.url) {
+                window.location.href = response.data.url;
+            }
+
         } catch (error) {
             console.error("Stripe Connection Error: ", error)
         }
@@ -339,6 +345,7 @@ const Signup = () => {
                             onClick={connectStripe}
                         >
                             Connect Stripe
+                            <Image src="/stripe.svg" alt="stripe" width={20} height={20} className='rounded-md'/>
                         </button>
                     </div>
                 )}

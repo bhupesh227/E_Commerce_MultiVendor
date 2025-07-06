@@ -5,6 +5,7 @@ import { AuthError, ValidationError } from "@packages/error-handler";
 import bcrypt from "bcryptjs";
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import { setCookie } from "../utils/cookies/setCookie";
+import stripe from "@packages/libs/stripe";
 
 export const userRegistration = async (req:Request, res:Response,next:NextFunction)=>{
 try {
@@ -301,5 +302,46 @@ export const createShop = async (req: Request, res: Response, next: NextFunction
     res.status(201).json({ success: true, shop });
   } catch (error) {
     next(error);
+  }
+};
+
+export const createStripeLink = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { sellerId } = req.body;
+    if (!sellerId) {
+      return next(new ValidationError(`Seller ID is required`));
+    }
+
+    const seller = await prisma.sellers.findUnique({ where: { id: sellerId } });
+
+    if (!seller) {
+      return next(new ValidationError(`Seller not found`));
+    }
+
+    const account = await stripe.accounts.create({
+      type: 'express',
+      country: seller.country,
+      email: seller?.email,
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
+    });
+
+    await prisma.sellers.update({
+      where: { id: sellerId },
+      data: { stripeId: account.id },
+    });
+
+    const accountLink = await stripe.accountLinks.create({
+      account: account.id,
+      refresh_url: `http://localhost:3000/success`,
+      return_url: `http://localhost:3000/success`,
+      type: 'account_onboarding',
+    });
+
+    return res.status(200).json({ url: accountLink.url });
+  } catch (error) {
+    return next(error);
   }
 };
