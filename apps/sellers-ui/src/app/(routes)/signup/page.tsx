@@ -7,6 +7,7 @@ import React, { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import axios, { AxiosError } from "axios"
 import { countries } from 'apps/sellers-ui/src/constants/Countries';
+import CreateShop from 'apps/sellers-ui/src/shared/components/CreateShop';
 
 
 
@@ -54,6 +55,7 @@ const Signup = () => {
 
     const verifyOtpMutation = useMutation({
         mutationFn: async () => {
+            if(!sellerData) return;
             const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/verify-seller`, { ...sellerData, otp: otp.join("") });
             return response.data;
         },
@@ -325,8 +327,7 @@ const Signup = () => {
                 )}
 
                 {activeStep === 2 && (
-                    <>
-                    </>
+                    <CreateShop sellerId={sellerId} setActiveStep={setActiveStep}/>
                 )}
 
                 {activeStep === 3 && (
