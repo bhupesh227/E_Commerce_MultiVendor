@@ -47,7 +47,7 @@ export const checkOtpRestrictions = async (
 };
 
 
-export const trackOtpRequests = async(email:string,next:NextFunction)=>{
+export const trackOtpRequests = async(email:string,next:NextFunction)=>{ 
   const otpRequestKey = `otp_request_count:${email}`;
   let otpRequests = parseInt((await redis.get(otpRequestKey)) || "0");
   if(otpRequests>=2){
@@ -102,13 +102,17 @@ export const handleForgotPassword = async (req: Request, res: Response, next: Ne
 
       if (!email) throw new ValidationError("Email is Required!");
 
-      const user = userType === "user" && await prisma.users.findUnique({ where: { email } }) ;
+      const user =
+        userType === 'user'
+          ? await prisma.users.findUnique({ where: { email } })
+          : await prisma.sellers.findUnique({ where: { email } });
+        
       if (!user) throw new ValidationError(`${userType} is not found!`);
 
       await checkOtpRestrictions(email, next);
       await trackOtpRequests(email, next);
 
-      await sendOtp(user.name, email, "forgot-password-user-mail" );
+      await sendOtp(user.name, email,  userType === 'user' ? "forgot-password-user-mail" : "forgot-password-seller-mail");
 
       res.json(200).json({
           message: "OTP sent to email. Please verify your account."
@@ -128,6 +132,6 @@ export const verifyUserForgotPasswordOTP = async (req: Request, res: Response, n
 
         res.status(200).json({ message: "OTP Verified. You can now reset your password." });
     } catch (error) {
-
+      next(error);
     }
 };

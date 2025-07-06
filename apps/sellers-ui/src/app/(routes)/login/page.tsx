@@ -51,7 +51,7 @@ const Login = () => {
       </p>
 
       <div className="w-full flex justify-center">
-        <div className="md:w-[480px] p-8 bg-white border border-gray-200 shadow rounded-lg">
+        <div className="w-3/5 md:w-[480px] p-8 bg-white border border-gray-200 shadow rounded-lg">
           <h3 className="text-3xl font-semibold text-center mb-2">
             Login to EComm
           </h3>
@@ -85,7 +85,7 @@ const Login = () => {
               </p>
             )}
 
-            <label className='block text-gray-700 mb-1'>Password</label>
+            <label className='block text-gray-700 mb-1 mt-5'>Password</label>
             <div className="relative">
               <input
                 type={passwordVisible ? "text" : "password"}
@@ -113,7 +113,7 @@ const Login = () => {
               )}
             </div>
 
-            <div className="flex justify-between items-center my-4">
+            <div className="flex justify-between items-center mt-8 mb-5">
               <label className="flex items-center text-gray-600">
                 <input
                   type="checkbox"
