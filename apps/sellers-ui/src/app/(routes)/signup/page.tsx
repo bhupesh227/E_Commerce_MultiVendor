@@ -2,7 +2,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-// import { useRouter } from 'next/navigation';
 import React, { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import axios, { AxiosError } from "axios"
@@ -13,7 +12,7 @@ import Image from 'next/image';
 
 
 const Signup = () => {
-    const [activeStep, setActiveStep] = useState(3);
+    const [activeStep, setActiveStep] = useState(1);
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [canResend, setCanResend] = useState(true);
     const [timer, setTimer] = useState(60);
@@ -99,6 +98,7 @@ const Signup = () => {
 
     const connectStripe = async () => {
         try {
+            
             const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/create-stripe-link`, { sellerId });
 
             if (response.data.url) {
@@ -221,7 +221,9 @@ const Signup = () => {
                                 >
                                     <option value="">Select your country</option>
                                     {countries.map((country) => (
-                                        <option key={country.code}>{country.name}</option>
+                                        <option key={country.code} value={country.code}>
+                                            {country.name}
+                                        </option>
                                     ))}
                                 </select>
                                 {errors.country && (

@@ -345,3 +345,62 @@ export const createStripeLink = async (req: Request, res: Response, next: NextFu
     return next(error);
   }
 };
+
+export const sellerLogin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return next(new AuthError(`All fields are required`));
+    }
+
+    const seller = await prisma.sellers.findUnique({ where: { email } });
+
+    if (!seller) {
+      return next(new AuthError(`User with email ${email} does not exist`));
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, seller.password!);
+    if (!isPasswordValid) {
+      return next(new ValidationError(`Invalid password or email`));
+    }
+
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+
+    const accessToken = jwt.sign(
+      { id: seller.id, role: 'seller' },
+      process.env.ACCESS_TOKEN_SECRET as string,
+      { expiresIn: '15m' }
+    );
+
+    const refreshToken = jwt.sign(
+      { id: seller.id, role: 'seller' },
+      process.env.REFRESH_TOKEN_SECRET as string,
+      {
+        expiresIn: '7d',
+      }
+    );
+
+    
+    setCookie(res, 'seller_access_token', accessToken);
+    setCookie(res, 'seller_refresh_token', refreshToken);
+
+    res.status(200).json({
+      message: `Logged in successfully!`,
+      user: { id: seller.id, email: seller.email, name: seller.name },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+
+export const getSeller = async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const seller = req.seller;
+    res.status(200).json({ success: true, seller });
+  } catch (error) {
+    next(error);
+  }
+}; 
