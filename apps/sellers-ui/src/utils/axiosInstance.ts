@@ -26,7 +26,7 @@ const onRefreshSuccess = () => {
   refreshSubscribers = [];
 };
 
-// Handle API requests , run before each request
+// Handle API requests
 axiosInstance.interceptors.request.use(
   (config) => config,
   (error) => Promise.reject(error)

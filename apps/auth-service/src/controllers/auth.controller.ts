@@ -76,8 +76,8 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
       const isMatchCredentials = await bcrypt.compare(password, user.password!);
       if (!isMatchCredentials) return next(new AuthError("Invalid email or password"));
 
-      res.clearCookie("seller-access-token");
-      res.clearCookie("seller-refresh-token");
+      res.clearCookie("seller_access_token");
+      res.clearCookie("seller_refresh_token");
 
       // Generate access and refresh tokens
       const accessToken = jwt.sign(
@@ -170,7 +170,9 @@ export const userResetPassword = async (
 export const handleRefreshToken = async (req: any, res: Response, next: NextFunction) => {
   try {
     const refreshToken =
-      req.cookies['refresh_token'] 
+      req.cookies['refresh_token'] ||
+      req.cookies['seller_refresh_token'] ||
+      (req.headers.authorization && req.headers.authorization.split(' ')[1]);
 
     if (!refreshToken) {
       return next(new ValidationError(`Unauthorized, no refresh token!`));
@@ -184,10 +186,20 @@ export const handleRefreshToken = async (req: any, res: Response, next: NextFunc
       return next(new JsonWebTokenError(`Forbidden! Invalid refresh token`));
     }
 
-    const user = await prisma.users.findUnique({ where: { id: decoded.id } });
+    let account;
 
-    if (!user) {
-      return next(new AuthError(`Forbidden! User/Seller not found!`));
+    if (decoded.role === 'user') {
+      account = await prisma.users.findUnique({ where: { id: decoded.id } });
+    
+    } else if (decoded.role === 'seller') {
+      account = await prisma.sellers.findUnique({
+        where: { id: decoded.id },
+        include: { shop: true },
+      });
+    }
+
+    if (!account) {
+      return new AuthError(`Forbidden! User/Seller not found!`);
     }
 
     const newAccessToken = jwt.sign(
@@ -196,7 +208,13 @@ export const handleRefreshToken = async (req: any, res: Response, next: NextFunc
       { expiresIn: '15m' }
     );
 
-    setCookie(res, 'access_token', newAccessToken);
+    if (decoded.role === 'user') {
+      setCookie(res, 'access_token', newAccessToken);
+    } else if (decoded.role === 'seller') {
+      setCookie(res, 'seller_access_token', newAccessToken);
+    }
+
+    req.role = decoded.role;
 
     return res.status(200).json({ success: true });
   } catch (error) {
@@ -399,6 +417,7 @@ export const sellerLogin = async (req: Request, res: Response, next: NextFunctio
 export const getSeller = async (req: any, res: Response, next: NextFunction) => {
   try {
     const seller = req.seller;
+    
     res.status(200).json({ success: true, seller });
   } catch (error) {
     next(error);

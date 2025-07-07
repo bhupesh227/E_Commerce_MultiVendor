@@ -9,7 +9,7 @@ const router:Router = express.Router();
 router.post("/user-registration",userRegistration);
 router.post("/verify-user",verifyUser);
 router.post("/login-user", loginUser);
-router.post("/refresh-token-user",handleRefreshToken);
+router.post("/refresh-token",handleRefreshToken);
 router.get("/logged-in-user",isAuthenticated,getUser);
 router.post("/forget-password-user", userForgotPassword);
 router.post("/verify-forgot-password-user",verifyUserForgotPassword );
@@ -20,7 +20,7 @@ router.post('/verify-seller', verifySeller);
 router.post('/create-shop', createShop);
 router.post("/create-stripe-link",createStripeLink);
 router.post('/login-seller', sellerLogin);
-router.post('/logged-in-seller', isAuthenticated , isSeller , getSeller);
+router.get('/logged-in-seller', isAuthenticated , isSeller , getSeller);
 
 
 export default router;
