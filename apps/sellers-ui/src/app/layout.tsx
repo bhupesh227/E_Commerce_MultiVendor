@@ -1,7 +1,7 @@
 import './global.css';
 import { Poppins } from 'next/font/google';
 import Provider from './Provider';
-
+import {Toaster} from 'sonner';
 
 export const metadata = {
   title: 'EComm Seller',
@@ -23,6 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.variable}`} suppressHydrationWarning={true}>
         <Provider>
+          <Toaster/>
           {children}
         </Provider>
         
