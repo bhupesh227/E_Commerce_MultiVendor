@@ -20,7 +20,7 @@ const CreateShop = ({ sellerId, setActiveStep }: Props) => {
 
     const shopCreationMutation = useMutation({
         mutationFn: async (data: any) => {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/create-shop`, data);
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/create-shop`, data);
             return response.data;
         },
         onSuccess: () => {

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "npx nx run-many --target=serve --all",
     "auth-docs": "node apps/auth-service/src/swagger.js",
+    "product-docs": "node apps/product-service/src/swagger.js",
     "user-ui": "npx nx run-many --target=dev --all --projects=users-ui",
     "seller-ui": "npx nx run-many --target=dev --all --projects=sellers-ui"
   },
@@ -33,6 +34,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-hook-form": "^7.59.0",
+    "react-quill-new": "^3.4.6",
     "sonner": "^2.0.5",
     "stripe": "^18.3.0",
     "styled-components": "^6.1.19",

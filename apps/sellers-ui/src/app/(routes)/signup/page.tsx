@@ -41,7 +41,7 @@ const Signup = () => {
 
     const signupMutation = useMutation({
         mutationFn: async (data: FormData) => {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/seller-registration`, data);
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/seller-registration`, data);
             return response.data;
         },
         onSuccess: (_, formData) => {
@@ -56,7 +56,7 @@ const Signup = () => {
     const verifyOtpMutation = useMutation({
         mutationFn: async () => {
             if(!sellerData) return;
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/verify-seller`, { ...sellerData, otp: otp.join("") });
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/verify-seller`, { ...sellerData, otp: otp.join("") });
             return response.data;
         },
         onSuccess: (data) => {
@@ -99,7 +99,7 @@ const Signup = () => {
     const connectStripe = async () => {
         try {
             
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/create-stripe-link`, { sellerId });
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/create-stripe-link`, { sellerId });
 
             if (response.data.url) {
                 window.location.href = response.data.url;

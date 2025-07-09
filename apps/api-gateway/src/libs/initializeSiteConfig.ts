@@ -21,7 +21,7 @@ const initializeSiteConfig = async () => {
                     'Books & Media',
                     'Other',
                 ],
-                subCategories: JSON.stringify({
+                subCategories: {
                     "Electronics": [
                         'Mobile Phones',
                         'Laptops',
@@ -71,7 +71,7 @@ const initializeSiteConfig = async () => {
                     "Automotive": ['Car Parts', 'Accessories', 'Other'],
                     'Books & Media': ['Books', 'Magazines', 'Newspapers', 'Other'],
                     "Other": ['Other'],
-                }),
+                },
             },
         });
     }
