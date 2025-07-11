@@ -214,11 +214,11 @@ export const createProduct = async (req: any, res: Response, next: NextFunction)
                 },
                 colors: colors || [],
                 sizes: sizes || [],
-                shopId: req.seller.shopId,
+                shopId: req.seller.shop.id,
             },
             include: {
                 images: true,
-                shop: true,
+                
             },
         });
 

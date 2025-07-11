@@ -74,7 +74,7 @@ const CreateProduct = () => {
         sizes: [],
     };
     
-    const { register, control,watch, setValue, handleSubmit,formState: { errors }} = useForm({defaultValues});
+    const { register, control,watch, setValue, handleSubmit,formState: { errors }} = useForm({defaultValues,mode: 'onChange'});
     
     const [openImageModal, setOpenImageModal] = useState(false);
     const [isChanged, setIsChanged] = useState(false);
@@ -301,7 +301,15 @@ const CreateProduct = () => {
                             type="text"
                             label="Product Title *"
                             placeholder="Enter product title"
-                            {...register('title', {required: `Title is required`,})}
+                            {...register('title', {
+                                required: `Title is required`,
+                                minLength: { value: 3, message: 'Title must be at least 3 characters' },
+                                maxLength: { value: 40, message: 'Title must be under 40 characters' },
+                                pattern: {
+                                    value: /^[A-Za-z\s\-']+$/,
+                                    message: 'Title must not contain numbers or special characters',
+                                },
+                            })}
                         />
                         {errors.title && (
                             <p className="text-red-500 text-sm mt-2">{errors.title.message as string} </p>
@@ -317,11 +325,12 @@ const CreateProduct = () => {
                                 {...register('description', {
                                     required: `Description is required`,
                                     validate: (value) => {
-                                    const wordCount = value.trim().split(/\s+/).length;
-                                    return (
-                                        wordCount <= 150 ||
-                                        `Description cannot exceed 150 words (Current: ${wordCount})`
-                                    );
+                                        const wordCount = value.trim().split(/\s+/).length;
+                                        if (/^[^a-zA-Z0-9]+$/.test(value)) return 'Description cannot be just symbols';
+                                        return (
+                                            wordCount <= 150 ||
+                                            `Description cannot exceed 150 words (Current: ${wordCount})`
+                                        );
                                     },
                                 })}
                             />
@@ -334,7 +343,16 @@ const CreateProduct = () => {
                                 type="text"
                                 label="Tags *"
                                 placeholder="apple,flagship,.."
-                                {...register('tags', { required: `Separate related tags with a comma`,})}
+                                {...register('tags', { 
+                                    required: `Separate related tags with a comma`,
+                                    validate: (value) => {
+                                        const tags = value.split(',').map(t => t.trim()).filter(Boolean);
+                                        if (tags.length === 0) return 'Please provide at least one tag';
+                                        if (tags.length > 10) return 'You can only provide up to 10 tags';
+                                        if (tags.some(tag => /\d/.test(tag))) return 'Tags should not contain numbers';
+                                        return true;
+                                    }
+                                })}
                             />
                             {errors.tags && (
                                 <p className="text-error">{String(errors.tags.message)}</p>
@@ -345,7 +363,13 @@ const CreateProduct = () => {
                                 type="text"
                                 label="Warranty *"
                                 placeholder="1 Year/ No warranty"
-                                {...register('warranty', {required: `Warranty is required`,})}
+                                {...register('warranty', {
+                                    required: `Warranty is required`,
+                                    pattern:{
+                                        value: /^(\d+\s*(Month|Months|Year|Years))|No warranty$/i,
+                                        message: 'Warranty must be like "1 Year", "2 Years", or "No warranty"', 
+                                    }
+                                })}
                             />
                             {errors.warranty && (
                                 <p className="text-error">{String(errors.warranty.message)}</p>

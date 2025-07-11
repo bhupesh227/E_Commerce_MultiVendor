@@ -13,8 +13,9 @@ type TextareaProps = BaseProps & TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 type Props = InputProps | TextareaProps;
 
-const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
-  ({ label, type = 'text', className, ...props }, ref) => {
+const Input = forwardRef<HTMLElement, Props>(
+  ({ label, type = 'text', className='', ...props }, ref) => {
+    const sharedClasses ='w-full border outline-none border-gray-700 bg-transparent p-2 rounded-md text-white';
     return (
         <div className="w-full">
             {label && (
@@ -25,7 +26,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
             {type === 'textarea' ? (
                 <textarea
                     ref={ref as Ref<HTMLTextAreaElement>}
-                    className={`w-full border outline-none border-gray-700 bg-transparent p-2 rounded-md text-white ${className}`}
+                    className={`${sharedClasses} ${className}`}
                     {...(props as TextareaProps)}
                 />
             ) : (
@@ -33,7 +34,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
                     type={type}
                     ref={ref as Ref<HTMLInputElement>}
                     {...(props as InputProps)}
-                    className={`w-full border outline-none border-gray-700 bg-transparent p-2 rounded-md text-white ${className}`}
+                    className={`${sharedClasses} ${className}`}
                 />
             )}
         </div>
