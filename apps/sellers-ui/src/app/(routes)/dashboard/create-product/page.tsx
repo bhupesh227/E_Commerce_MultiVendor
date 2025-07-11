@@ -85,6 +85,7 @@ const CreateProduct = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [activeEffect, setActiveEffect] = useState<string | null>(null);
     const [Processing, setProcessing] = useState(false);
+    const [formSubmitted, setFormSubmitted] = useState(false);
 
     const router = useRouter();
 
@@ -93,7 +94,6 @@ const CreateProduct = () => {
         queryFn: async () => {
             try {
                 const response = await axiosInstance.get('/product/api/get-categories');
-                console.log('Fetched categories:', response.data);
                 return response.data;
             } catch (error) {
                 console.error('Error fetching categories:', error);
@@ -214,6 +214,11 @@ const CreateProduct = () => {
     const onSubmit = async (data: FormData) => {
         setLoading(true);
         try {
+            setFormSubmitted(true);
+            if (images.length === 0 || images.every(img => img === null)) {
+                toast.error('Please upload at least one product image');
+                return;
+            }
             const payload = {
                 ...data,
                 shortDescription: data.description,
@@ -291,6 +296,11 @@ const CreateProduct = () => {
                         />
                     ))}
                 </div>
+                {formSubmitted && images.length === 0 && (
+                    <p className="text-red-500 text-sm mt-2">
+                        Please upload at least one product image
+                    </p>
+                )}
             </div> 
 
             <div className='md:w-[65%]'>

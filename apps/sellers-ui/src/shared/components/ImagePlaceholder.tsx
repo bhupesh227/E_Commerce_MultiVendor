@@ -66,7 +66,7 @@ const ImagePlaceholder = ({
                 <button
                     type="button"
                     disabled={isDeleting}
-                    onClick={() => onRemove?.(index)}
+                    onClick={() => onRemove?.(index!)}
                     className="absolute top-3 right-3 p-2 rounded bg-red-600 shadow-lg"
                 >
                     {isDeleting ? (
