@@ -1,29 +1,41 @@
 "use client";
-import { Pencil, WandSparkles, X } from 'lucide-react';
+import { LoaderCircle, Pencil, WandSparkles, X } from 'lucide-react';
 import Image from 'next/image';
 import React, { ChangeEvent, useState } from 'react'
 
 
-interface ImagePlaceHolderProps {
-  size: string;
-  index: any;
-  small?: boolean;
-  onImageChange: (file: File | null, index: number) => void;
-  onRemove: (index: number) => void;
-  defaultImage?: string | null;
-  setOpenImageModal: (openImageModal: boolean) => void;
+type UploadedImage = {
+    fileUrl: string;
+    fileId: string;
+};
 
+interface ImagePlaceHolderProps {
+    size: string;
+    index: any;
+    small?: boolean;
+    onImageChange: (file: File | null, index: number) => void;
+    onRemove: (index: number) => void;
+    defaultImage?: string | null;
+    setOpenImageModal: (openImageModal: boolean) => void;
+    setSelectedImage: (image: string | null) => void;
+    images: (UploadedImage | null)[];
+    isUploading?: boolean;
+    isDeleting?: boolean;
 }
 
 
 const ImagePlaceholder = ({
-  size,
-  index = null,
-  small,
-  onImageChange,
-  onRemove,
-  defaultImage = null,
-  setOpenImageModal,
+    size,
+    index = null,
+    small,
+    onImageChange,
+    onRemove,
+    defaultImage = null,
+    setOpenImageModal,
+    setSelectedImage,
+    images,
+    isUploading,
+    isDeleting 
 }: ImagePlaceHolderProps) => {
 
     const [imagePreview, setImagePreview] = useState<string | null>(defaultImage);
@@ -53,24 +65,30 @@ const ImagePlaceholder = ({
             <>
                 <button
                     type="button"
-                    
+                    disabled={isDeleting}
                     onClick={() => onRemove?.(index)}
                     className="absolute top-3 right-3 p-2 rounded bg-red-600 shadow-lg"
                 >
-                    
-                    <X size={16} />
-                    
+                    {isDeleting ? (
+                        <LoaderCircle className='animate-spin' size={16} />
+                    ) : (
+                        <X size={16} />
+                    )}    
                 </button>
                 <button
+                    disabled={isUploading}
                     className="absolute top-3 right-[70px] p-2 rounded bg-blue-500 shadow-lg cursor-pointer"
                     onClick={() => {
                         setOpenImageModal(true);
-                    
+                        setSelectedImage(images[index]?.fileUrl || null);
                     }}
                     
                 >
-                    
-                    <WandSparkles size={16} />
+                    {isUploading ? (
+                        <LoaderCircle className='animate-spin' size={16} />
+                    ):(
+                        <WandSparkles size={16} />
+                    )}
                     
                 </button>
             </>

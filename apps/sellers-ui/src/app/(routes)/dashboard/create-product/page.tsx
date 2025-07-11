@@ -1,10 +1,13 @@
 "use client";
 
 import { useQuery } from '@tanstack/react-query';
+import { aiEnhancements } from 'apps/sellers-ui/src/constants';
 import ImagePlaceholder from 'apps/sellers-ui/src/shared/components/ImagePlaceholder';
 import axiosInstance from 'apps/sellers-ui/src/utils/axiosInstance';
-import { ChevronRight, LoaderCircle } from 'lucide-react';
+import { ChevronRight, LoaderCircle, Wand, X } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import ColorSelector from 'packages/components/ColorSelector';
 import CustomProperties from 'packages/components/CustomProperties';
 import CustomSpecification from 'packages/components/CustomSpecification';
@@ -13,15 +16,77 @@ import RichTextEditor from 'packages/components/RichTextEditor';
 import SizeSelector from 'packages/components/SizeSelector';
 import React, { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+
+type FormData = {
+    discountCodes: string[];
+    title: string;
+    description: string;
+    tags: string;
+    warranty: string;
+    slug: string;
+    brand: string;
+    cashOnDelivery: string;
+    category: string;
+    subcategory: string;
+    detailedDescription: string;
+    videoUrl: string;
+    regularPrice: number;
+    salePrice: number;
+    stock: number;
+    images: (UploadedImage | null)[];
+    colors: string[];
+    customSpecifications: { name: string; value: string }[];
+    customProperties: { label: string; values: string[] }[];
+    sizes: string[];
+};
+
+
+type UploadedImage = {
+    fileUrl: string;
+    fileId: string;
+};
+
+
 
 const CreateProduct = () => {
-    const { register, control,watch, setValue, handleSubmit,formState: { errors },
-        } = useForm({ mode: "onChange" });
+
+    const defaultValues: FormData = {
+        discountCodes: [],
+        title: '',
+        description: '',
+        tags: '',
+        warranty: '',
+        slug: '',
+        brand: '',
+        cashOnDelivery: 'yes',
+        category: '',
+        subcategory: '',
+        detailedDescription: '',
+        videoUrl: '',
+        regularPrice: 0,
+        salePrice: 0,
+        stock: 1,
+        images: [null],
+        colors: [],
+        customSpecifications: [],
+        customProperties: [],
+        sizes: [],
+    };
+    
+    const { register, control,watch, setValue, handleSubmit,formState: { errors }} = useForm({defaultValues});
     
     const [openImageModal, setOpenImageModal] = useState(false);
     const [isChanged, setIsChanged] = useState(false);
-    const [images, setImages] = useState<(File | null)[]>([]);
+    const [images, setImages] = useState<(UploadedImage | null)[]>([null]);
     const [Loading, setLoading] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [activeEffect, setActiveEffect] = useState<string | null>(null);
+    const [Processing, setProcessing] = useState(false);
+
+    const router = useRouter();
 
     const {data, isLoading, isError}= useQuery({
         queryKey: ['categories'],
@@ -49,46 +114,131 @@ const CreateProduct = () => {
         return selectedCategory ? subCategoriesData[selectedCategory] || [] : [];
     }, [selectedCategory, subCategoriesData]);
 
+    const { data: discount_codes, isLoading: isDiscountLoading } = useQuery({
+        queryKey: ['discount-codes'],
+        queryFn: async () => {
+            const response = await axiosInstance.get('/product/api/get-discount-codes');
+            return response.data.discountCodes || [];
+        },
+        staleTime: 1000 * 60 * 5,
+        retry: 2,
+    });
 
-    const onSubmit = (data:any) => {
-        console.log(data);
-        // Handle form submission logic here
-    }
+
+    const convertFileToBase64 =async (file: File) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+        });
+    };
 
     const handleImageChange = async (file: File | null, index: number) => {
-        
-        const updatedImages = [...images];
+        if(!file) return;
+        setIsUploading(true);
 
-        updatedImages[index] = file;
+        try {
+            const base64 = await convertFileToBase64(file);
+            const response = await axiosInstance.post("/product/api/upload-product-image", { fileName: base64});
 
-        if (index == images.length - 1 && images.length < 8) {
-            updatedImages.push(null);
+            const updatedImages = [...images];
+            const uploadedFile = {
+                fileId: response.data.fileId,
+                fileUrl: response.data.fileUrl,
+            };
+
+            updatedImages[index] = uploadedFile;
+            if (index == images.length - 1 && images.length < 8) {
+                updatedImages.push(null);
+            }
+            setImages(updatedImages);
+            setValue('images', updatedImages);
+        } catch (error) {
+            console.error("Error uploading image:", error);
+        } finally{
+            setIsUploading(false);
+            
         }
-        setImages(updatedImages);
-        setValue('images', updatedImages);
         
     };
 
     const handleRemoveImage = async (index: number) => {
-        setImages((prevImages) => {
-            let updatedImages = [...prevImages];
+        setIsDeleting(true);
+        try {
+            const updatedImages = [...images];
 
-            if(index ==-1){
-                updatedImages[0] = null;
-            }else{
-                updatedImages.splice(index, 1);
+            const imageToRemove = updatedImages[index];
+
+            if(imageToRemove && typeof imageToRemove === "object") {
+                await axiosInstance.delete("/product/api/delete-product-image", {
+                    data: { fileId: imageToRemove.fileId },
+                });
             }
+            updatedImages.splice(index, 1);
 
-            if (updatedImages.includes(null) && updatedImages.length < 8) {
+            if (!updatedImages.includes(null) && updatedImages.length < 8) {
                 updatedImages.push(null);
             }
-            return updatedImages;
-        })
-        setValue('images', images);
+
+            setImages(updatedImages);
+            setValue('images', updatedImages);
+        } catch (error) {
+            console.error("Error removing image:", error);
+            
+        } finally{
+            setIsDeleting(false);
+        }
     };
 
     const handleSaveDraft = () => {
         
+    };
+
+
+    const applyTransformation = async (effect: string) => {
+        if (Processing || !selectedImage) return;
+        setProcessing(true);
+        setActiveEffect(effect);
+
+        try {
+            const transformedUrl = `${selectedImage}?tr=${effect}`;
+            setSelectedImage(transformedUrl);
+        } catch (error) {
+            console.error('Error applying transformation:', error);
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const onSubmit = async (data: FormData) => {
+        setLoading(true);
+        try {
+            const payload = {
+                ...data,
+                shortDescription: data.description,
+                subCategory: data.subcategory,
+                cashOnDelivery: data.cashOnDelivery === 'yes',
+                images: (data.images || []).filter(
+                    (img) => img && img.fileId && img.fileUrl
+                ),
+            };
+            await axiosInstance.post('/product/api/create-product', payload);
+            
+            toast.success('Product created successfully');
+            setIsChanged(false);
+            router.push('/dashboard/all-products');
+
+        } catch (error: any) {
+            const message =
+                error?.response?.data?.message ||
+                error?.data?.message ||
+                error?.message ||
+                'Something went wrong';
+            toast.error(message);
+        } finally {
+            setLoading(false);
+        }
     };
 
   return (
@@ -118,6 +268,10 @@ const CreateProduct = () => {
                         index={0}                    
                         onRemove={handleRemoveImage}
                         onImageChange={handleImageChange}
+                        setSelectedImage={setSelectedImage}
+                        images={images}
+                        isUploading={isUploading}
+                        isDeleting={isDeleting}
                     />
                 )}
                 <div className="grid grid-cols-2 gap-3 mt-4">
@@ -130,6 +284,10 @@ const CreateProduct = () => {
                             index={index + 1}
                             onRemove={handleRemoveImage}
                             onImageChange={handleImageChange}
+                            setSelectedImage={setSelectedImage}
+                            images={images}
+                            isUploading={isUploading}
+                            isDeleting={isDeleting}
                         />
                     ))}
                 </div>
@@ -456,13 +614,81 @@ const CreateProduct = () => {
                                 Select Discount Codes (optional)
                             </label>
 
-                            
+                            {isDiscountLoading ?(
+                                <div className="text-gray-400 flex items-center justify-center">
+                                    <LoaderCircle size={20} className="animate-spin" />
+                                </div>
+                            ):(
+                                <div className="flex flex-wrap gap-2">
+                                    {discount_codes.map((code:any)=>(
+                                        <button
+                                            key={code.id}
+                                            className={`px-3 py-1 rounded-md text-sm font-semibold border ${
+                                                watch('discountCodes')?.includes(code.id)
+                                                    ? 'bg-blue-600 text-white border-blue-600'
+                                                    : 'bg-gray-700 text-gray-300 border-gray-600 hover:border-gray-700'
+                                                }`
+                                            }
+                                            onClick={() => {
+                                                const currentSelection = watch('discountCodes') || [];
+                                                const updatedSelection = currentSelection?.includes(code.id)
+                                                    ? currentSelection.filter((id: string) => id !== code.id)
+                                                    : [...currentSelection, code.id];
+                                                setValue('discountCodes', updatedSelection);
+                                            }}
+                                        >
+                                            {code.publicName} ({code.discountValue}{' '}
+                                            {code.discountType === 'percentage' ? '%' : '₹'})
+                                        </button>
+                                    ))}
+                                </div>
+                            )} 
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        
+        {openImageModal && (
+            <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="bg-gray-800 p-6 rounded-lg w-[450px] text-white">
+                    <div className="flex justify-between items-center pb-3 mb-4">
+                        <h2 className="text-lg font-semibold">Enhance product image</h2>
+                        <X size={20} className="cursor-pointer" onClick={() => setOpenImageModal(false)}/>
+                    </div>
+                    <div className="relative w-full h-[250px] rounded-md overflow-hidden border border-gray-600">
+                        {selectedImage && (
+                            <Image src={selectedImage} alt="selected image" layout="fill" />
+                        )}
+                    </div>
 
+                    {selectedImage && (
+                        <div className="mt-4 space-y-2">
+                            <h3 className="text-white text-sm font-semibold">
+                                AI Enhancements
+                            </h3>
+                            <div className="grid grid-cols-2 gap-3 max-h-[250px] overflow-y-auto">
+                                {aiEnhancements.map(({ label, effect }) => (
+                                    <button
+                                        key={effect}
+                                        className={`p-2 rounded-md flex items-center gap-2 whitespace-nowrap ${
+                                            activeEffect === effect
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                                        }`}
+                                        onClick={() => applyTransformation(effect)}
+                                        disabled={Processing}
+                                    >
+                                        <Wand size={18} />
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        )}
         <div className='mt-6 flex justify-end gap-3'>
             {isChanged && (
                 <button

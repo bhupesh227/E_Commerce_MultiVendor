@@ -1,4 +1,5 @@
-import { NotFoundError, ValidationError } from "@packages/error-handler";
+import { AuthError, NotFoundError, ValidationError } from "@packages/error-handler";
+import imageKit from "@packages/libs/imagekit";
 import prisma from "@packages/libs/prisma";
 import { NextFunction, Request, Response } from "express";
 
@@ -95,5 +96,139 @@ export const deleteDiscountCodes = async (req: any, res: Response, next: NextFun
         
     } catch (error) {
         next(error);
+    }
+}
+
+
+export const uploadProductImage = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { fileName } = req.body;
+
+        if(!fileName) {
+            throw new ValidationError("File required.")
+        }
+
+        const response = await imageKit.upload({
+            file : fileName,
+            fileName : `product-${Date.now()}.jpg`,
+            folder: "/ecomm/product"
+        })
+
+        res.status(201).json({
+            fileId: response.fileId,
+            fileUrl: response.url,
+            message: "Image uploaded successfully",
+        })
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const deleteProductImage = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { fileId } = req.body;
+
+        if(!fileId) {
+            throw new ValidationError("File required.")
+        }
+
+        const response = await imageKit.deleteFile(fileId);
+
+        res.status(201).json({
+            success : true,
+            response
+        })
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+export const createProduct = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        
+        const {
+            title,
+            shortDescription,
+            detailedDescription,
+            warranty,
+            customSpecifications,
+            customProperties,
+            slug,
+            tags,
+            cashOnDelivery,
+            brand,
+            videoUrl,
+            category,
+            subCategory,
+            regularPrice,
+            salePrice,
+            stock,
+            discountCodes,
+            images,
+            colors,
+            sizes,} = req.body; 
+
+        if(!title || !shortDescription || !slug || !salePrice || !cashOnDelivery || !regularPrice || !stock || !category || !subCategory || !images) {
+            return next(new  ValidationError("Missing some required fileds!"));
+        }
+
+        if(!req.seller.id) {
+            return next(new  AuthError("Only seller can create products!"));
+        }
+
+        const slugChecking = await prisma.products.findUnique({ where: { slug } });
+
+        if (slugChecking) {
+            return next(new ValidationError(`Slug already exists! Please use a different slug`));
+        }
+
+        const newProduct = await prisma.products.create({
+            data: {
+                title,
+                shortDescription,
+                detailedDescription,
+                warranty,
+                customSpecifications: customSpecifications || {},
+                customProperties : customProperties || {},
+                slug,
+                tags: Array.isArray(tags) ? tags : tags.split(','),
+                cashOnDelivery,
+                brand,
+                videoUrl,
+                category,
+                subCategory,
+                regularPrice: parseFloat(regularPrice),
+                salePrice: parseFloat(salePrice),
+                stock: parseInt(stock),
+                discountCodes: discountCodes.map((code: string) => code),
+                images: {
+                    create: images
+                        .filter((image: any) => image && image.fileId && image.fileUrl)
+                        .map((image: any) => ({
+                            file_id: image.fileId,
+                            url: image.fileUrl,
+                        })),
+                },
+                colors: colors || [],
+                sizes: sizes || [],
+                shopId: req.seller.shopId,
+            },
+            include: {
+                images: true,
+                shop: true,
+            },
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Product created successfully",
+            product: newProduct,
+        });
+    } catch (error) {
+        next(error);
+        
     }
 }

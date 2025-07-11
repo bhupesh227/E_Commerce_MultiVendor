@@ -6,13 +6,13 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 const CustomSpecification = ({control, errors}:any) => {
     const { fields, append , remove} = useFieldArray({
         control,
-        name: 'custom_specifications',
+        name: 'customSpecifications',
     });
 
   return (
     <div>
         <label
-            htmlFor="custom_specifications"
+            htmlFor="customSpecifications"
             className="block font-semibold text-gray-300 mb-1"
         >
             Custom Specifications
@@ -21,7 +21,7 @@ const CustomSpecification = ({control, errors}:any) => {
             {fields.map((_, index) => (
                 <div key={index} className="flex gap-2 items-center">
                     <Controller
-                        name={`custom_specifications.${index}.name`}
+                        name={`customSpecifications.${index}.name`}
                         control={control}
                         rules={{ required: `Specification name is required` }}
                         render={({ field }) => (
@@ -33,7 +33,7 @@ const CustomSpecification = ({control, errors}:any) => {
                         )}
                     />
                     <Controller
-                        name={`custom_specifications.${index}.value`}
+                        name={`customSpecifications.${index}.value`}
                         control={control}
                         rules={{ required: `Value is required` }}
                         render={({ field }) => (
@@ -61,9 +61,9 @@ const CustomSpecification = ({control, errors}:any) => {
                 <PlusCircle size={20} /> Add specification
             </button>
         </div>
-        {errors.custom_specifications && (
+        {errors.customSpecifications && (
             <p className="text-error">
-                {String(errors.custom_specifications.message)}
+                {String(errors.customSpecifications.message)}
             </p>
         )}
     </div>

@@ -15,6 +15,8 @@ model images {
   shopId    String?   @unique @db.ObjectId
   users     users?    @relation(fields:[userId],references:[id])
   shops     shops?    @relation(fields: [shopId], references: [id])
+  products  products? @relation(fields: [productId], references: [id])
+  productId String?   @unique @db.ObjectId
 }
 
 model users{
@@ -62,6 +64,7 @@ model shops {
   sellers       sellers       @relation(fields: [sellerId], references: [id])
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  products      products[]
 }
 
 model shopReviews {
@@ -91,4 +94,47 @@ model discountCodes {
   sellerId      String   @db.ObjectId
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+
+enum productStatus {
+  Active
+  Pending
+  Draft
+}
+
+model products {
+  id                   String        @id @default(auto()) @map("_id") @db.ObjectId
+  title                String
+  slug                 String        @unique
+  category             String
+  subCategory          String
+  shortDescription     String
+  detailedDescription  String?
+  images               images[]
+  videoUrl             String?
+  tags                 String[]
+  brand                String?
+  colors               String[]
+  sizes                String[]
+  startingDate         DateTime?
+  endingDate           DateTime?
+  stock                Int
+  salePrice            Float
+  regularPrice         Float
+  ratings              Float         @default(0)
+  totalSales           Int           @default(0)
+  warranty             String
+  customSpecifications Json?
+  customProperties     Json
+  isDeleted            Boolean?      @default(false)
+  cashOnDelivery       Boolean
+  discountCodes        String[]      @db.ObjectId 
+  status               productStatus @default(Active)
+  deletedAt            DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  shopId               String        @db.ObjectId
+  shop                 shops         @relation(fields: [shopId], references: [id])
+   
 }
