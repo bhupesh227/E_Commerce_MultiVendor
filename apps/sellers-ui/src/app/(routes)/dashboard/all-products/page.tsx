@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from 'apps/sellers-ui/src/utils/axiosInstance';
 import {
   flexRender,
@@ -12,11 +12,18 @@ import { BarChart, ChevronRight, Eye, Loader2, Pencil, Plus, Search, Star, Trash
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react'
+import DeleteConfirmationModal from 'apps/sellers-ui/src/shared/components/DeleteConfirmationModal';
+import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 const AllProducts = () => {
     const [globalFilter, setGlobalFilter] = useState('');
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<any>(null);
+    // const [analyticsData, setAnalyticsData] = useState(null);
+    // const [showAnalytics, setShowAnalytics] = useState(false);
 
-
+    const queryClient = useQueryClient();
 
     const fetchProducts = async () => {
         const response = await axiosInstance.get('/product/api/get-shop-products');
@@ -28,6 +35,47 @@ const AllProducts = () => {
       queryFn: fetchProducts,
       staleTime: 1000 * 60 * 5,
     });
+
+
+    const deleteMutation = useMutation({
+      mutationFn: async(productId: string) =>{
+        axiosInstance.delete(`/product/api/delete-product/${productId}`);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['shop-products'] });
+        toast.success('Product deleted successfully');
+        setShowDeleteModal(false);
+      },
+      onError: (error: AxiosError) => {
+        const errorMessage =
+          (error.response?.data as { message?: string })?.message ||
+          'Something went wrong';
+        toast.error(errorMessage);
+      },
+    });
+
+    const restoreMutation = useMutation({
+      mutationFn: async(productId: string) =>{
+        axiosInstance.put(`/product/api/restore-product/${productId}`);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['shop-products'] });
+        toast.success('Product restored successfully');
+        setShowDeleteModal(false);
+      },
+      onError: (error: AxiosError) => {
+        const errorMessage =
+          (error.response?.data as { message?: string })?.message ||
+          'Something went wrong';
+        toast.error(errorMessage);
+      },
+    });
+
+
+    const openDeleteModal = (product: any) => {
+      setSelectedProduct(product);
+      setShowDeleteModal(true);
+    };
 
     const columns = useMemo(() => [
       {
@@ -118,7 +166,7 @@ const AllProducts = () => {
               <BarChart size={18} />
             </button>
             <button
-              //onClick={() => openDeleteModal(row.original)}
+              onClick={() => openDeleteModal(row.original)}
               className="text-red-400 hover:text-red-300 transition"
             >
               <Trash size={18} />
@@ -213,6 +261,16 @@ const AllProducts = () => {
           </table>
         )}
       </div>
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          product={selectedProduct}
+          onRestore={() => restoreMutation.mutate(selectedProduct?.id)}
+          onConfirm={() => deleteMutation.mutate(selectedProduct?.id )}
+          onClose={() => setShowDeleteModal(false)}
+          isDeleting={deleteMutation.isPending}
+          isRestoring={restoreMutation.isPending}
+        />
+      )}
     </div>
   )
 }
