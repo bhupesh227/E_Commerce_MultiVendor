@@ -1,8 +1,11 @@
 import express from 'express';
+import './jobs/product-cron.job';
 import cors from 'cors';
 import { errorMiddleware } from '@packages/error-handler/error-middleware';
 import cookieParser from 'cookie-parser';
 import router from './routes/product.routes';
+import swaggerUi from 'swagger-ui-express'
+const swaggerDocument = require('./swagger-output.json')
 
 
 const app = express();
@@ -21,6 +24,10 @@ app.get('/', (req, res) => {
     res.send({ message: 'Hello Product API'});
 });
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.get("/docs-json", (req, res) => {
+    res.json(swaggerDocument)
+})
 
 app.use("/api", router);
 
@@ -30,7 +37,7 @@ const port = process.env.PORT || 6002;
 
 const server = app.listen(port, () => {
     console.log(`Product Service is running at http://localhost:${port}`);
-    console.log(`Swagger Docs available at http://localhost:${port}/docs`)
+    console.log(`Swagger Docs available at http://localhost:${port}/api-docs`)
 });
 
 server.on('error', (error) => {
