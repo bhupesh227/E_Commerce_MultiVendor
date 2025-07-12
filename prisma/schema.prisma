@@ -16,7 +16,7 @@ model images {
   users     users?    @relation(fields:[userId],references:[id])
   shops     shops?    @relation(fields: [shopId], references: [id])
   products  products? @relation(fields: [productId], references: [id])
-  productId String?   @unique @db.ObjectId
+  productId String?   @db.ObjectId
 }
 
 model users{

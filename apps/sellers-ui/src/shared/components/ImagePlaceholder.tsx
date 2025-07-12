@@ -1,7 +1,7 @@
 "use client";
 import { LoaderCircle, Pencil, WandSparkles, X } from 'lucide-react';
 import Image from 'next/image';
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 
 
 type UploadedImage = {
@@ -49,6 +49,12 @@ const ImagePlaceholder = ({
         }
     };
 
+    useEffect(() => {
+        const uploadedUrl = images[index]?.fileUrl;
+        if (uploadedUrl) {
+            setImagePreview(uploadedUrl);
+        }
+}, [images, index]);
   return (
     <div className={`relative ${small ? 'h-[180px]' : 'h-[450px]'
       } w-full cursor-pointer bg-[#1e1e1e] border border-gray-600 rounded-lg flex flex-col items-center justify-center`}>
@@ -66,7 +72,10 @@ const ImagePlaceholder = ({
                 <button
                     type="button"
                     disabled={isDeleting}
-                    onClick={() => onRemove?.(index!)}
+                    onClick={() =>{
+                        onRemove?.(index!)
+                        setImagePreview(null);
+                    }}
                     className="absolute top-3 right-3 p-2 rounded bg-red-600 shadow-lg"
                 >
                     {isDeleting ? (

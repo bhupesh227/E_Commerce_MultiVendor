@@ -37,8 +37,8 @@ const AllProducts = () => {
           console.log(row.original)
           return(
           <Image
-            src={row.original.images[0]?.fileUrl || ''}
-            alt={row.original.images[0]?.fileUrl || ''}
+            src={row.original.images[0]?.url || ''}
+            alt={row.original.images[0]?.url || ''}
             width={100}
             height={100}
             className="rounded-md object-cover w-12 h-12"
@@ -68,7 +68,7 @@ const AllProducts = () => {
       {
         accessorKey: 'price',
         header: 'Price',
-        cell: ({ row }) => <span>${row.original.salePrice}</span>,
+        cell: ({ row }) => <span>₹{row.original.salePrice}</span>,
       },
       {
         accessorKey: 'stock',

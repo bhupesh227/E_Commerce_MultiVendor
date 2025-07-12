@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from '@tanstack/react-query';
-import { aiEnhancements } from 'apps/sellers-ui/src/constants';
+import { aiEnhancements, REQUIRED_BASE_EFFECTS } from 'apps/sellers-ui/src/constants';
 import ImagePlaceholder from 'apps/sellers-ui/src/shared/components/ImagePlaceholder';
 import axiosInstance from 'apps/sellers-ui/src/utils/axiosInstance';
 import { ChevronRight, LoaderCircle, Wand, X } from 'lucide-react';
@@ -83,7 +83,7 @@ const CreateProduct = () => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [activeEffect, setActiveEffect] = useState<string | null>(null);
+    const [activeEffect, setActiveEffect] = useState<string []>([]);
     const [Processing, setProcessing] = useState(false);
     const [formSubmitted, setFormSubmitted] = useState(false);
 
@@ -139,8 +139,8 @@ const CreateProduct = () => {
         setIsUploading(true);
 
         try {
-            const base64 = await convertFileToBase64(file);
-            const response = await axiosInstance.post("/product/api/upload-product-image", { fileName: base64});
+            const fileName = await convertFileToBase64(file);
+            const response = await axiosInstance.post("/product/api/upload-product-image", { fileName});
 
             const updatedImages = [...images];
             const uploadedFile = {
@@ -181,8 +181,8 @@ const CreateProduct = () => {
                 updatedImages.push(null);
             }
 
-            setImages(updatedImages);
-            setValue('images', updatedImages);
+            setImages([...updatedImages]);
+            setValue('images', [...updatedImages]);
         } catch (error) {
             console.error("Error removing image:", error);
             
@@ -199,11 +199,32 @@ const CreateProduct = () => {
     const applyTransformation = async (effect: string) => {
         if (Processing || !selectedImage) return;
         setProcessing(true);
-        setActiveEffect(effect);
+        
 
         try {
-            const transformedUrl = `${selectedImage}?tr=${effect}`;
+            const [baseUrl] = selectedImage.split('?tr=');
+            let updatedEffects = [...activeEffect];
+            const dependencies = REQUIRED_BASE_EFFECTS[effect] || [];
+            dependencies.forEach((dep) => {
+                if (!updatedEffects.includes(dep)) {
+                    updatedEffects.push(dep);
+                }
+            });
+            if (updatedEffects.includes(effect)) {
+                updatedEffects = updatedEffects.filter((e) => e !== effect);
+                Object.entries(REQUIRED_BASE_EFFECTS).forEach(([dependent, deps]) => {
+                    if (deps.includes(effect)) {
+                    updatedEffects = updatedEffects.filter((e) => e !== dependent);
+                    }
+                });
+            } else {
+                updatedEffects.push(effect);
+            }
+
+            const transformedUrl = `${baseUrl}?tr=${updatedEffects.join(':')}`;
+            console.log('Applying transformation:', transformedUrl);
             setSelectedImage(transformedUrl);
+            setActiveEffect(updatedEffects);
         } catch (error) {
             console.error('Error applying transformation:', error);
         } finally {
@@ -688,16 +709,25 @@ const CreateProduct = () => {
                 <div className="bg-gray-800 p-6 rounded-lg w-[450px] text-white">
                     <div className="flex justify-between items-center pb-3 mb-4">
                         <h2 className="text-lg font-semibold">Enhance product image</h2>
-                        <X size={20} className="cursor-pointer" onClick={() => setOpenImageModal(false)}/>
+                        <X size={20} className="cursor-pointer" onClick={() => setOpenImageModal(!openImageModal)}/>
                     </div>
                     <div className="relative w-full h-[250px] rounded-md overflow-hidden border border-gray-600">
                         {selectedImage && (
-                            <Image src={selectedImage} alt="selected image" layout="fill" />
+                            <Image src={selectedImage} alt="selected image" fill unoptimized style={{objectFit:'cover'}}/>
                         )}
                     </div>
 
                     {selectedImage && (
                         <div className="mt-4 space-y-2">
+                            {activeEffect.length > 0 && (
+                                <div className="flex gap-2 mt-1 flex-wrap">
+                                    {activeEffect.map(effect => (
+                                    <span key={effect} className="px-2 py-1 text-sm bg-blue-600 text-white rounded">
+                                        {effect.replace('e-', '').replace(/-/g, ' ')}
+                                    </span>
+                                    ))}
+                                </div>
+                            )}
                             <h3 className="text-white text-sm font-semibold">
                                 AI Enhancements
                             </h3>
@@ -706,7 +736,7 @@ const CreateProduct = () => {
                                     <button
                                         key={effect}
                                         className={`p-2 rounded-md flex items-center gap-2 whitespace-nowrap ${
-                                            activeEffect === effect
+                                            activeEffect.includes(effect)
                                                 ? 'bg-blue-600 text-white'
                                                 : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
                                         }`}
