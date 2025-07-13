@@ -1,6 +1,7 @@
 import { AuthError, NotFoundError, ValidationError } from "@packages/error-handler";
 import imageKit from "@packages/libs/imagekit";
 import prisma from "@packages/libs/prisma";
+import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
 
@@ -205,6 +206,7 @@ export const createProduct = async (req: any, res: Response, next: NextFunction)
                 stock: parseInt(stock),
                 discountCodes: discountCodes.map((code: string) => code),
                 images: {
+                    
                     create: images
                         .filter((image: any) => image && image.fileId && image.fileUrl)
                         .map((image: any) => ({
@@ -344,4 +346,59 @@ export const restoreProduct = async (req: any, res: Response, next: NextFunction
         next(error);
     }
 }
+
+
+export const getAllProducts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const skip = (page - 1) * limit;
+    const type = req.query.type ;
+
+    const baseFilter = {
+      OR: [{ isDeleted: false }, { isDeleted: null }],
+    };
+
+    const orderBy: Prisma.productsOrderByWithRelationInput =
+      type === 'latest'
+        ? { createdAt: 'desc' as Prisma.SortOrder }
+        : { totalSales: 'desc' as Prisma.SortOrder };
+
+    const [products, total, top10Products] = await Promise.all([
+        prisma.products.findMany({
+            skip,
+            take: limit,
+            include: {
+                images: true,
+                shop: true,
+            },
+            where: baseFilter,
+            orderBy:{
+                totalSales: 'desc',
+            }
+        }),
+        prisma.products.count({ where: baseFilter,}),
+        prisma.products.findMany({
+            take: 10,
+            where: baseFilter,
+            orderBy,
+        })
+    ]);
+
+    res.status(200).json({
+        products,
+        top10By: type === 'latest' ? 'latest' : 'topSales',
+        top10Products,
+        total,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
