@@ -48,7 +48,7 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
       try {
         await axios.post(
-          `${process.env.NEXT_PUBLIC_SERVER_URL}/refresh-token`,
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/api/refresh-token`,
           {},
           { withCredentials: true }
         );
