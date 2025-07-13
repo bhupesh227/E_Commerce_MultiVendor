@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import Ratings from './Ratings';
-import { Eye, Heart, ShoppingBag } from 'lucide-react';
+import { Eye, Heart, ShoppingCartIcon } from 'lucide-react';
 import ProductDetailsCard from './ProductDetailsCard';
+import { useStore } from '../../store';
+import useUser from '../../hooks/useUser';
+import useLocationTracking from '../../hooks/useLocation';
+import useDeviceTracking from '../../hooks/useDevice';
 
 
 interface Props {
@@ -14,7 +18,20 @@ const ProductCard = ({ product, isEvent = false }: Props) => {
   const [timeLeft, setTimeLeft] = useState('');
   const [open, setOpen] = useState(false);
 
-   useEffect(() => {
+  const addToCart = useStore((state : any) => state.addToCart);
+  const addToWishlist = useStore((state : any) => state.addToWishlist);
+  const removeFromWishlist = useStore((state : any) => state.removeFromWishlist);
+  const wishlist = useStore((state : any) => state.wishlist);
+  const cart = useStore((state) => state.cart);
+
+  const isWishlisted = wishlist.some((item:any) => item.id === product.id);
+  const isInCart = cart.some((item) => item.id === product.id);
+
+  const {user} = useUser();
+  const location = useLocationTracking();
+  const deviceInfo = useDeviceTracking();
+
+  useEffect(() => {
     if (isEvent && product?.endingDate) {
       const interval = setInterval(() => {
         const now = Date.now();
@@ -69,13 +86,31 @@ const ProductCard = ({ product, isEvent = false }: Props) => {
           </Link>
 
       
-          <div className="absolute flex flex-col gap-2 right-1 top-2 z-10 opacity-50 hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute flex flex-col gap-2 right-1 top-2 z-10 opacity-70 hover:opacity-100 transition-opacity duration-300">
             <div className="bg-white rounded-full p-[6px] shadow-md">
               <Heart  
                 className="cursor-pointer hover:scale-110 transition"
                 size={20}
-                fill={`red`}
-                stroke={`red`}
+                fill={`${isWishlisted ? "red" : "transaparent"}`}
+                stroke={`${isWishlisted ? "red" : "#4b5563"}`}
+                onClick={() => {
+                    if(isWishlisted) {
+                        removeFromWishlist(product.id, user, location, deviceInfo)
+                    } else {
+                        addToWishlist({...product, quantity: 1}, user, location, deviceInfo)
+                    }
+                }}
+              />
+            </div>
+            <div className="bg-white rounded-full p-[6px] shadow-md">
+              <ShoppingCartIcon 
+                className="cursor-pointer hover:scale-110 transition"
+                size={20}
+                fill={`${isInCart ? "orange" : "transparent"}`}
+                stroke={`${isInCart ? "#4ff" : "#4b5563"}`}
+                onClick={() => {
+                    !isInCart && addToCart({...product, quantity: 1}, user, location, deviceInfo)
+                }}
               />
             </div>
             <div className="bg-white rounded-full p-[6px] shadow-md">
@@ -83,12 +118,6 @@ const ProductCard = ({ product, isEvent = false }: Props) => {
                 className="cursor-pointer hover:scale-110 transition text-[#4b5563]"
                 size={20}
                 onClick={()=> setOpen(true)}
-              />
-            </div>
-            <div className="bg-white rounded-full p-[6px] shadow-md">
-              <ShoppingBag  
-                className="cursor-pointer text-[#4b5563] hover:scale-110 transition"
-                size={20}
               />
             </div>
           </div>

@@ -5,9 +5,14 @@ import { Heart, Search, ShoppingCart, User } from 'lucide-react';
 import Logo from 'apps/users-ui/src/assets/Logo';
 import HeaderBottom from './header-bottom';
 import useUser from 'apps/users-ui/src/hooks/useUser';
+import { useStore } from 'apps/users-ui/src/store';
 
 const Header = () => {
   const { user, isLoading } = useUser();
+  const cart = useStore((state) => state.cart);
+  const wishlist = useStore((state) => state.wishlist);
+
+
   return (
     <header className="w-full bg-white">
       <div className="w-[80%] py-5 m-auto flex items-center justify-between">
@@ -64,7 +69,7 @@ const Header = () => {
               <Heart />
               <div className="h-6 w-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
                 <span className="text-white font-medium text-sm">
-                  0
+                  {wishlist.length}
                 </span>
               </div>
             </Link>
@@ -76,7 +81,7 @@ const Header = () => {
               <ShoppingCart />
               <div className="h-6 w-6 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
                 <span className="text-white font-medium text-sm">
-                  0
+                  {cart.length}
                 </span>
               </div>
             </Link>

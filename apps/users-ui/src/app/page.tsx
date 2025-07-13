@@ -21,16 +21,16 @@ const page = () => {
     
   });
 
-  const { data: latestProducts } = useQuery({
-    queryKey: ['latest-products'],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        '/product/api/get-all-products?page=1&limit=10&type=latest'
-      );
-      return response.data.products;
-    },
-    staleTime: 1000 * 60 * 2,
-  });
+  // const { data: latestProducts } = useQuery({
+  //   queryKey: ['latest-products'],
+  //   queryFn: async () => {
+  //     const response = await axiosInstance.get(
+  //       '/product/api/get-all-products?page=1&limit=10&type=latest'
+  //     );
+  //     return response.data.products;
+  //   },
+  //   staleTime: 1000 * 60 * 2,
+  // });
   return (
     <div className='bg-[#f5f5f5]'>
       <Hero />
