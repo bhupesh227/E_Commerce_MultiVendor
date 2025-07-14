@@ -9,7 +9,7 @@ const Hero = () => {
     const router = useRouter();
 
   return (
-    <div className="bg-[#115061] h-[90vh] flex flex-col justify-center w-full">
+    <div className="bg-[#115061] h-[95vh] flex flex-col justify-center w-full">
         <div className="md:w-[80%] w-[90%] m-auto md:flex h-full items-center">
             <div className="md:w-1/2">
                 <p className="font-Roboto font-semibold text-white mt-8 pb-2 text-xl">Starting from Rs40</p>

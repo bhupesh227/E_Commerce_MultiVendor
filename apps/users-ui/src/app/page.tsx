@@ -15,7 +15,6 @@ const page = () => {
       const response = await axiosInstance.get(
         '/product/api/get-all-products?page=1&limit=10'
       );
-      console.log("prodcut sssssss",response.data);
       return response.data.products;
     },
     

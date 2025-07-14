@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
 type Product = {
   id: string;
@@ -43,7 +43,7 @@ type Store = {
 };
 
 
-const isClient = typeof window !== 'undefined';
+
 
 
 export const useStore = create<Store>()(
@@ -98,10 +98,7 @@ export const useStore = create<Store>()(
         }),
         { 
             name: 'store-storage',
-            storage: isClient
-                ? createJSONStorage(() => localStorage)
-                : undefined, 
-            skipHydration: true,
+            
         }
     )
 );
