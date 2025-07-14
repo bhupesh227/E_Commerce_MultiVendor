@@ -121,7 +121,7 @@ const ProductDetailsCard = ({  setOpen, data }: Props) => {
                         </button>
                         
                     </div>
-                    <h3 className="text-xl font-semibold mt-3">{data?.title}</h3>
+                    <h3 className="text-xl font-semibold mt-3 capitalize">{data?.title}</h3>
                     <p className="mt-2 text-gray-700 whitespace-pre-wrap w-full">
                         {data?.shortDescription}
                     </p>
@@ -130,7 +130,7 @@ const ProductDetailsCard = ({  setOpen, data }: Props) => {
                             <strong>Brand:</strong> {data.brand}
                         </p>
                     )}
-                    <div className="flex flex-col md:flex-row items-start gap-5 mt-4">
+                    <div className="flex flex-col items-start gap-5 mt-4">
                         {data?.colors?.length > 0 && (
                             <div>
                                 <strong>Colors:</strong>

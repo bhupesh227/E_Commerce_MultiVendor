@@ -74,7 +74,7 @@ const ProductCard = ({ product, isEvent = false }: Props) => {
           </div>
         )}
 
-        <div className='relative pr-10'>
+        <div className='pr-10'>
           <Link href={`/product/${product?.slug}`}>
             <img 
               src={product?.images[0]?.url || "https://images.unsplash.com/photo-1635405074683-96d6921a2a"} 
@@ -133,7 +133,7 @@ const ProductCard = ({ product, isEvent = false }: Props) => {
         <Link 
             href={`/product/${product?.slug}`}
         >
-            <h3 className="text-base font-semibold px-2 text-gray-800 line-clamp-1">
+            <h3 className="text-base font-bold px-2 text-gray-900 line-clamp-1 capitalize">
                 {product?.title}
             </h3>
         </Link>
