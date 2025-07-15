@@ -1,7 +1,19 @@
-import { defaultColors } from 'apps/sellers-ui/src/constants';
+
 import { Plus } from 'lucide-react';
 import React, { useState } from 'react'
 import { Controller } from 'react-hook-form';
+
+
+export const defaultColors = [
+  '#000000',
+  '#ffffff',
+  '#ff0000',
+  '#00ff00',
+  '#0000ff',
+  '#ffff00',
+  '#ff00ff',
+  '#00ffff',
+];
 
 const ColorSelector = ({ control, errors }: any) => {
     const [customColors, setCustomColors] = useState<string[]>([]);
