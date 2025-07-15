@@ -62,7 +62,7 @@ const page = () => {
     useEffect(() => {
         updateURL();
         fetchFilteredProducts();
-    }, [ selectedCategories, page]);
+    }, [ selectedCategories,selectedCountries, page]);
 
 
     const toggleCategory = (label: string) => {
@@ -121,18 +121,18 @@ const page = () => {
                         Countries
                     </h3>
                     <ul className='space-y-2 !mt-3'>
-                        {countries?.map((country: any) => (
+                        {countries?.map((country) => (
                             <li
-                                key={country}
+                                key={country.name}
                                 className='flex items-center justify-between'
                             >
                                 <label className='flex items-center gap-3 text-sm text-gray-700'>
                                     <input type="checkbox"
-                                        checked={selectedCategories.includes(country)}
-                                        onChange={() => toggleCountry(country)}
+                                        checked={selectedCountries.includes(country.code)}
+                                        onChange={() => toggleCountry(country.code)}
                                         className='accent-blue-600'
                                     />
-                                    {country}
+                                    {country.name}
                                 </label>
                             </li>
                         ))}

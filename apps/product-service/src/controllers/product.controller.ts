@@ -598,10 +598,12 @@ export const getFilteredShops = async (req: Request, res: Response, next: NextFu
             }
         }
         if (countries && String(countries).length > 0) {
-            filters.countries = {
-                in: Array.isArray(countries) 
-                    ? countries 
-                    : String(countries).split(",")
+            filters.sellers = {
+                country: {
+                    in: Array.isArray(countries)
+                        ? countries 
+                        : String(countries).split(",")
+                }
             }
         }
 
