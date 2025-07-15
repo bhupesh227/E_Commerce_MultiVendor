@@ -20,16 +20,16 @@ const page = () => {
     
   });
 
-  // const { data: latestProducts } = useQuery({
-  //   queryKey: ['latest-products'],
-  //   queryFn: async () => {
-  //     const response = await axiosInstance.get(
-  //       '/product/api/get-all-products?page=1&limit=10&type=latest'
-  //     );
-  //     return response.data.products;
-  //   },
-  //   staleTime: 1000 * 60 * 2,
-  // });
+  const { data: latestProducts ,isLoading : LatestProductsLoading } = useQuery({
+    queryKey: ['latest-products'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(
+        '/product/api/get-all-products?page=1&limit=10&type=latest'
+      );
+      return response.data.products;
+    },
+    staleTime: 1000 * 60 * 2,
+  });
   return (
     <div className='bg-[#f5f5f5]'>
       <Hero />
@@ -54,6 +54,45 @@ const page = () => {
             ))}
           </div>
         )}
+        {products?.length === 0 && (
+          <p className='text-center'>
+            No Products Available yet!
+          </p>
+        )}
+
+        {isLoading && (
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5'>
+            {Array.from({ length: 10 }).map((_, index) => (
+              <div
+                key={index}
+                className='h-[250px] bg-gray-300 animate-pulse rounded-xl'
+              >
+
+              </div>
+            ))}
+          </div>
+        )}
+
+
+        <div className='my-8 block'>
+          <SectionTitle title='Latest Products' />
+        </div>
+        {!LatestProductsLoading && (
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5 pb-2'>
+              {latestProducts?.map((product: any) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+          {!LatestProductsLoading && latestProducts.length === 0 && (
+            <p className='text-center'>
+              No Product Available yet
+            </p>
+          )}
+
+          {/* <div className='my-8 block'>
+            <SectionTitle title='Top Shops' />
+          </div> */}
       </div>
     </div>
   )
