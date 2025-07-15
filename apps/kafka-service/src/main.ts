@@ -1,8 +1,16 @@
-import { kafka } from '@packages/utils/kafka'
+
+import { kafka } from '@packages/utils/kafka';
 import { updateUserAnalytics } from './services/analytics.service';
 
-
-const consumer = kafka.consumer({ groupId: 'user-events-group' });
+const consumer = kafka.consumer({ 
+    groupId: 'user-events-debug-group',
+    allowAutoTopicCreation: true,
+    sessionTimeout: 30000,
+    retry : {
+        initialRetryTime: 300,
+        retries: 5,
+    },
+  });
 
 const eventQueue: any[] = [];
 
@@ -11,12 +19,15 @@ const processQueue = async () => {
   if (eventQueue.length === 0) return;
 
   const events = [...eventQueue];
+
   eventQueue.length = 0;
 
   for (const event of events) {
+    
     if (event.action === 'shop_visit') {
-      // update shop analytics
+      continue; 
     }
+
     const validActions = [
       'add_to_wishlist',
       'add_to_cart',
@@ -26,6 +37,7 @@ const processQueue = async () => {
     ];
 
     if (!event.action || !validActions.includes(event.action)) {
+      console.warn("Skipping invalid action:", event.action);
       continue;
     }
     try {
@@ -40,16 +52,24 @@ setInterval(processQueue, 3000);
 
 
 export const consumeKafkaMessages = async () => {
-  // connect to the kafka broker
-  await consumer.connect();
-  await consumer.subscribe({ topic: "users-events", fromBeginning: false })
+  try {
+    await consumer.connect();
+  } catch (err) {
+    console.error("❌ Kafka connection failed:", err);
+    return;
+  }
+  await consumer.subscribe({ topic: "users-events", fromBeginning: true });
 
   await consumer.run({
-    eachMessage: async ({ message }) => {
+    eachMessage: async ({ topic, partition, message }) => {
       if (!message.value) return;
-      const event = JSON.parse(message.value.toString());
-      
-      eventQueue.push(event);
+      const raw = message.value.toString();
+      try {
+        const event = JSON.parse(raw);
+        eventQueue.push(event);
+      } catch (err) {
+        console.error("❌ Error parsing Kafka message:", err);
+      }
     }
   })
 }

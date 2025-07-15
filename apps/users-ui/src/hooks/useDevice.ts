@@ -17,7 +17,7 @@ const useDeviceTracking = () => {
         );
     }, []);
 
-    return { deviceInfo };
+    return  deviceInfo ;
 };
 
 export default useDeviceTracking;

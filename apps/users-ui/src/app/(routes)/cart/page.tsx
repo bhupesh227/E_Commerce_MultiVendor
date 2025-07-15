@@ -19,7 +19,7 @@ const Cart = () => {
 
   const {user} = useUser();
   const {location} = useLocationTracking();
-  const {deviceInfo} = useDeviceTracking();
+  const deviceInfo = useDeviceTracking();
 
 
   const removeFromCart = useStore((state : any) => state.removeFromCart);

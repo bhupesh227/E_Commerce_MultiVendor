@@ -9,4 +9,5 @@ export const kafka = new Kafka({
         username: process.env.KAFKA_API_KEY!,
         password: process.env.KAFKA_API_SECRET!,
     }
+    
 });

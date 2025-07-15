@@ -61,7 +61,7 @@ export const updateUserAnalytics = async (event: any) => {
 
         // keep only the last 100 actions (prevent storage overload)
         if (updatedActions.length > 100) {
-            updatedActions.shift();
+            updatedActions = updatedActions.slice(-100);
         }
 
         const extraFields: Record<string, any> = {};
@@ -75,12 +75,10 @@ export const updateUserAnalytics = async (event: any) => {
         }
 
         if (event.device) {
-            extraFields.device = event.device;
+            extraFields.device = typeof event.device === 'string'
+                ? event.device
+                : event.device.deviceInfo || 'Unknown';
         }
-
-        // update or create userAnalytics
-
-        console.log("📝 Final updatedActions to be saved:", updatedActions);
 
         await prisma.userAnalytics.upsert({
             where: { userId: event.userId },
@@ -124,7 +122,7 @@ export const updateProductAnalytics = async (event: any) => {
         if (event.action === 'add_to_wishlist')
             updateFields.wishListAdds = { increment: 1 };
 
-        if (event.action === 'remove_to_wishlist')
+        if (event.action === 'remove_from_wishlist')
             updateFields.wishListAdds = { decrement: 1 };
 
         if (event.action === 'purchase')
@@ -150,6 +148,8 @@ export const updateProductAnalytics = async (event: any) => {
                 lastViewedAt: new Date(),
             }
         });
+
+        console.log("Product analytics updated for:", event.productId);
     } catch (error) {
         console.log("Error updating product analytics:", error);
     }
