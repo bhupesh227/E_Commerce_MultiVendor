@@ -11,7 +11,7 @@ import React from 'react'
 
 const Wishlist = () => {
     const { user } = useUser();
-    const { location } = useLocationTracking();
+    const location  = useLocationTracking();
     const  deviceInfo  = useDeviceTracking();
 
     const wishlist = useStore((state) => state.wishlist);

@@ -18,7 +18,7 @@ const Cart = () => {
   const [loading, ] = useState(false);
 
   const {user} = useUser();
-  const {location} = useLocationTracking();
+  const location = useLocationTracking();
   const deviceInfo = useDeviceTracking();
 
 

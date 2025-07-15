@@ -10,9 +10,9 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import initializeSiteConfig from './libs/initializeSiteConfig';
+import dotenv from 'dotenv';
 
-
-
+dotenv.config();
 const app = express();
 
 app.use(cors({

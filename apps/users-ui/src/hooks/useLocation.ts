@@ -45,7 +45,7 @@ const useLocationTracking = () => {
     }
   }, []);
 
-  return {location};
+  return location;
 };
 
 export default useLocationTracking;
