@@ -9,7 +9,9 @@ import axiosInstance from 'apps/users-ui/src/utils/axiosInstance';
 import { ChevronRight, Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner';
 
 const Cart = () => {
   const [discountedProductId, ] = useState("");
@@ -17,11 +19,12 @@ const Cart = () => {
   const [discountPercent, ] = useState<number>(0);
   const [couponCode, setCouponCode] = useState("");
   const [selectedAddressId, setSelectedAddressId] = useState("");
-  const [loading, ] = useState(false);
+  const [loading,setLoading ] = useState(false);
 
   const {user} = useUser();
   const location = useLocationTracking();
   const deviceInfo = useDeviceTracking();
+  const router = useRouter();
 
 
   const removeFromCart = useStore((state : any) => state.removeFromCart);
@@ -72,6 +75,29 @@ const Cart = () => {
         }
     }
   }, [addresses, selectedAddressId]);
+
+
+  const createPaymentSession = async () => {
+    if (addresses.length === 0) {
+        toast.error("Please set your delivery address to create an order!");
+        return;
+    }
+    setLoading(true);
+    try {
+        const res = await axiosInstance.post("/order/api/create-payment-session", {
+            cart,
+            selectedAddressId,
+            coupon: {},
+        });
+        const sessionId = res.data.sessionId;
+        router.push(`/checkout?sessionId=${sessionId}`);
+
+    } catch (error) {
+        toast.error("Something went wrong. Please try Again");
+    } finally {
+        setLoading(false);
+    }
+  }
 
   return (
     <div className="w-full bg-white mt-4">
@@ -302,6 +328,7 @@ const Cart = () => {
                   </div>
 
                   <button
+                    onClick={createPaymentSession}
                     disabled={loading}
                     className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989FF] transition-all rounded-lg"
                   >
