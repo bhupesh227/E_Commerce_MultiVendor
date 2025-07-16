@@ -2,6 +2,7 @@ import Header from '../shared/widgets/header';
 import './global.css';
 import { Poppins } from 'next/font/google';
 import Providers from './providers';
+import { Toaster } from 'sonner';
 
 
 export const metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.variable}`} suppressHydrationWarning={true}>
         <Providers>
+          <Toaster richColors/>
           <Header/>
           {children}
         </Providers>  
