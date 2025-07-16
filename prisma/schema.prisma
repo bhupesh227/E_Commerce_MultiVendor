@@ -20,15 +20,16 @@ model images {
 }
 
 model users{
-  id        String @id @default(auto()) @map("_id") @db.ObjectId 
-  name      String
-  email     String @unique
-  password  String?
-  following String[]
-  avatar    images[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  reviews   shopReviews[]
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId 
+  name          String
+  email         String        @unique
+  password      String?
+  following     String[]
+  avatar        images[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  shopReviews   shopReviews[]
+  orders        orders[]
 }
 
 
@@ -44,6 +45,8 @@ model sellers {
   shop            shops?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
+  isDeleted       Boolean    @default(false)
+  deletedAt       DateTime?
 }
 
 
@@ -57,7 +60,7 @@ model shops {
   address       String
   opening_hours String?
   website       String?
-  socialLInks   Json[]
+  socialLinks   Json[]
   ratings       Float         @default(0)
   reviews       shopReviews[]
   sellerId      String        @unique @db.ObjectId
@@ -65,6 +68,9 @@ model shops {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   products      products[]
+  isDeleted     Boolean       @default(false)
+  deletedAt     DateTime?
+  orders        orders[]
 }
 
 model shopReviews {
@@ -185,4 +191,45 @@ model address {
   country     String
   isDefault   Boolean         @default(true)
   createdAt   DateTime        @default(now())
+}
+
+
+model orders {
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String       @db.ObjectId
+  user              users        @relation(fields: [userId], references: [id])
+  shopId            String       @db.ObjectId
+  shop              shops        @relation(fields: [shopId], references: [id])
+  total             Float
+  shippingAddressId String?
+  couponCode        String?
+  discountAmount    Float?
+  status            String
+  deliveryStatus    String        @default("Ordered")
+  items             orderItems[]  @relation("OrderItemsRelation")
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model orderItems {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId         String   @db.ObjectId
+  productId       String
+  quantity        Int
+  price           Float
+  selectedOptions Json?
+  orders          orders   @relation(fields: [orderId], references: [id], name: "OrderItemsRelation")
+  createdAt       DateTime @default(now())
+}
+
+model notifications {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  title           String   
+  message         String   
+  creatorId       String   @db.ObjectId
+  receiverId      String   @db.ObjectId
+  redirect_link   String   
+  isRead          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

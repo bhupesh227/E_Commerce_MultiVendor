@@ -10,12 +10,12 @@ import axiosInstance from 'apps/users-ui/src/utils/axiosInstance';
 import { BadgeCheck, Bell, CheckCircle, Clock, Gift, Inbox, Loader2, Lock, LogOut, MapPin, Pencil, PhoneCall, Receipt, Settings, ShoppingBag, Truck, User } from 'lucide-react'
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 
 
-const page = () => {
+const ProfilePageContent = () => {
     const searchParams = useSearchParams();
     const queryTab = searchParams.get('active') || "Profile";
     const [activeTab, setActiveTab] = useState(queryTab);
@@ -181,7 +181,20 @@ const page = () => {
             </div>
         </div>
     </div>
+  );
+};
+
+
+const Page = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="animate-spin h-12 w-12 text-blue-600" />
+      </div>
+    }>
+      <ProfilePageContent />
+    </Suspense>
   )
 }
 
-export default page
+export default Page
