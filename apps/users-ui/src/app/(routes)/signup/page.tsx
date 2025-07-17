@@ -184,8 +184,18 @@ const SignupPage = () => {
                     {...register('password', {
                       required: 'Password is required',
                       minLength: {
-                        value: 6,
-                        message: 'Password must be at least 6 characters',
+                        value: 8,
+                        message: 'Password must be at least 8 characters',
+                      },
+                      validate: {
+                        hasLower: (value) =>
+                            /[a-z]/.test(value) || "Must include a lowwercase letter",
+                        hasUpper: (value) =>
+                            /[A-Z]/.test(value) || "Must include an uppercase letter",
+                        hasNumber: (value) =>
+                            /\d/.test(value) || "Must include a number",
+                        hasSpecial: (value) =>
+                            /[!@#$%^&*(),.?":{}|<>]/.test(value) || "Must include a special character",
                       },
                     })}
                   />

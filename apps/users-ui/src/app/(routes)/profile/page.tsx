@@ -1,8 +1,10 @@
 "use client";
 
-import { useQueryClient } from '@tanstack/react-query';
-import useUser from 'apps/users-ui/src/hooks/useUser';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import useUserRequiredAuth from 'apps/users-ui/src/hooks/useUserRequiredAuth';
+import ChangePassword from 'apps/users-ui/src/shared/components/ChangePassword';
 import NavItem from 'apps/users-ui/src/shared/components/NavItem';
+import OrdersTable from 'apps/users-ui/src/shared/components/OrdersTable';
 import QuickActionCard from 'apps/users-ui/src/shared/components/QuickActionCard';
 import ShippingAddressSection from 'apps/users-ui/src/shared/components/ShippingAddressSection';
 import StatCard from 'apps/users-ui/src/shared/components/StatCard';
@@ -23,7 +25,7 @@ const ProfilePageContent = () => {
     const router = useRouter();
     const queryClient = useQueryClient();
     
-    const {user, isLoading} = useUser();
+    const {user, isLoading} = useUserRequiredAuth();
 
     useEffect(() => {
         if (activeTab !== queryTab) {
@@ -41,6 +43,24 @@ const ProfilePageContent = () => {
         });
     };
 
+    const { data: orders = [] } = useQuery({
+        queryKey: ['user-orders'],
+        queryFn: async () => {
+            const res = await axiosInstance.get(`/order/api/get-user-orders`);
+            return res.data.orders;
+        }
+    });
+
+    const totalOrders = orders.length;
+
+    const processingOrders = orders.filter(
+        (o: any) => o?.deliveryStatus !== "Delivered" && o?.deliveryStatus !== 'Cancelled'
+    ).length;
+
+    const completeOrders = orders.filter(
+        (o: any) => o?.deliveryStatus === "Delivered"
+    ).length;
+
   return (
     <div className='bg-gray-50 p-6 pb-14'>
         <div className='md:max-w-7xl mx-auto'>
@@ -57,9 +77,9 @@ const ProfilePageContent = () => {
                 </h1>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                <StatCard title="Total Orders" count={10} Icon={Clock} />
-                <StatCard title="Processing Orders" count={4} Icon={Truck} />
-                <StatCard title="Completed Orders" count={5} Icon={CheckCircle} />
+                <StatCard title="Total Orders" count={totalOrders} Icon={Clock} />
+                <StatCard title="Processing Orders" count={processingOrders} Icon={Truck} />
+                <StatCard title="Completed Orders" count={completeOrders} Icon={CheckCircle} />
             </div>
 
             <div className='mt-10 flex flex-col md:flex-row gap-6'>
@@ -144,11 +164,14 @@ const ProfilePageContent = () => {
                         ) : ( activeTab === 'Shipping Address' ?(
 
                                 <ShippingAddressSection />
-
-                       
-                        ):(
+                            ) : activeTab === 'My Orders' ? (
+                                <OrdersTable/>
+                            ) : activeTab === "Change Password" ? (
+                                <ChangePassword />
+                            ) : (
                                 <></>
-                        ))
+                            )
+                        )
                     }
                 </div>
                 <div className='w-full md:w-1/4 space-y-4'>

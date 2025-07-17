@@ -1,7 +1,7 @@
 
 'use client';
 
-import { navItems } from 'apps/users-ui/src/app/config/constants';
+import { navItems } from 'apps/users-ui/src/config/constants';
 import useUser from 'apps/users-ui/src/hooks/useUser';
 import { useStore } from 'apps/users-ui/src/store';
 import {

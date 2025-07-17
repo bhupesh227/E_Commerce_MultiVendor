@@ -3,7 +3,7 @@
 import { MapPin, Plus, Trash2, X } from 'lucide-react';
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form';
-import { countries } from '../../app/config/countries';
+import { countries } from '../../config/countries';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'sonner';

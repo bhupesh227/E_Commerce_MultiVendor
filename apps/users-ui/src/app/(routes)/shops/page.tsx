@@ -5,9 +5,10 @@ import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
-import { categories } from '../../config/categories';
-import { countries } from '../../config/countries';
+
 import ShopCard from 'apps/users-ui/src/shared/components/ShopCard';
+import { categories } from 'apps/users-ui/src/config/categories';
+import { countries } from 'apps/users-ui/src/config/countries';
 
 
 

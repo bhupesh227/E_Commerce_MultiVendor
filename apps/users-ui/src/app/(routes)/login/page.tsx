@@ -81,20 +81,20 @@ const LoginPage = () => {
 
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <label htmlFor="email" className="block text-gray-700 mb-1">
-                    Email
+                        Email
                     </label>
                     <input
-                    type="email"
-                    id="email"
-                    placeholder="Enter your email"
-                    className="w-full p-2 border border-gray-300 outline-none rounded mb-1"
-                    {...register('email', {
-                        required: 'Email is required',
-                        pattern: {
-                        value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                        message: 'Invalid email address',
-                        },
-                    })}
+                        type="email"
+                        id="email"
+                        placeholder="Enter your email"
+                        className="w-full p-2 border border-gray-300 outline-none rounded mb-1"
+                        {...register('email', {
+                            required: 'Email is required',
+                            pattern: {
+                            value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                            message: 'Invalid email address',
+                            },
+                        })}
                     />
                     {errors.email && (
                     <p className="text-red-500 text-sm text-center">
@@ -105,32 +105,32 @@ const LoginPage = () => {
                         Password
                     </label>
                     <div className="relative">
-                    <input
-                        type={passwordVisible ? 'text' : 'password'}
-                        id="password"
-                        placeholder="Enter your Password"
-                        className="w-full p-2 border border-gray-300 outline-none rounded mb-1"
-                        {...register('password', {
-                        required: 'Password is required',
-                        minLength: {
-                            value: 6,
-                            message: 'Password must be at least 6 characters',
-                        },
-                        })}
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setPasswordVisible(!passwordVisible)}
-                        className="absolute inset-y-0 right-3 flex items-center text-gray-400"
-                    >
-                        {passwordVisible ? <Eye /> : <EyeOff />}
-                    </button>
+                        <input
+                            type={passwordVisible ? 'text' : 'password'}
+                            id="password"
+                            placeholder="Enter your Password"
+                            className="w-full p-2 border border-gray-300 outline-none rounded mb-1"
+                            {...register('password', {
+                                required: 'Password is required',
+                                minLength: {
+                                    value: 6,
+                                    message: 'Password must be at least 6 characters',
+                                },
+                            })}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setPasswordVisible(!passwordVisible)}
+                            className="absolute inset-y-0 right-3 flex items-center text-gray-400"
+                        >
+                            {passwordVisible ? <Eye /> : <EyeOff />}
+                        </button>
                     </div>
-                        {errors.password && (
+                    {errors.password && (
                         <p className="text-red-500 text-sm text-center">
                             {String(errors.password.message)}
                         </p>
-                        )}
+                    )}
                     <div className="flex justify-between items-center my-4">
                         <label
                             htmlFor="rememberMe"
