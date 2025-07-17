@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable}`} suppressHydrationWarning={true}>
+      <body className={`${poppins.variable} bg-slate-900`} suppressHydrationWarning={true}>
         <Provider>
           <Toaster/>
           {children}
