@@ -14,12 +14,14 @@ import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner';
 
 const Cart = () => {
-  const [discountedProductId, ] = useState("");
-  const [discountAmount, ] = useState<number>(0);
-  const [discountPercent, ] = useState<number>(0);
+  const [discountedProductId, setDiscountedProductId] = useState("");
+  const [discountAmount,setDiscountAmount ] = useState<number>(0);
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [couponCode, setCouponCode] = useState("");
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [loading,setLoading ] = useState(false);
+  const [error, setError] = useState("");
+  const [storedCouponCode, setStoredCouponCode] = useState("");
 
   const {user} = useUser();
   const location = useLocationTracking();
@@ -87,7 +89,12 @@ const Cart = () => {
         const res = await axiosInstance.post("/order/api/create-payment-session", {
             cart,
             selectedAddressId,
-            coupon: {},
+            coupon: {
+                code: storedCouponCode,
+                discountAmount: discountAmount,
+                discountPercent: discountPercent,
+                discountedProductId: discountedProductId
+            },
         });
         const sessionId = res.data.sessionId;
         router.push(`/checkout?sessionId=${sessionId}`);
@@ -98,6 +105,41 @@ const Cart = () => {
         setLoading(false);
     }
   }
+
+
+  const couponCodeApplyHandler = async () => {
+      setError("");
+
+      if (!couponCode.trim()) {
+          setError("Coupon code is required!");
+          return;
+      }
+      try {
+          const res = await axiosInstance.put("/order/api/verify-coupon", {
+              couponCode: couponCode.trim(),
+              cart
+          });
+
+          if (res.data.valid) {
+              setStoredCouponCode(couponCode.trim());
+              setDiscountAmount(parseFloat(res.data.discountAmount));
+              setDiscountPercent(res.data.discount);
+              setDiscountedProductId(res.data.discountedProductId);
+              setCouponCode("");
+          } else {
+              setDiscountAmount(0);
+              setDiscountPercent(0);
+              setDiscountedProductId("");
+              setError(res.data.message || "Coupon not valid for any items in cart.");
+          }
+
+      } catch (error: any) {
+          setDiscountAmount(0);
+          setDiscountPercent(0);
+          setDiscountedProductId("");
+          setError(error?.response?.data?.message);
+      }
+    };
 
   return (
     <div className="w-full bg-white mt-4">
@@ -264,12 +306,14 @@ const Cart = () => {
 
                     <button
                       className="bg-blue-500 cursor-pointer px-4 text-white rounded-r-md hover:bg-blue-600 transition-all"
+                      onClick={couponCodeApplyHandler}
                     >
                       Apply
                     </button>
-
                   </div>
-                  
+                  {error &&
+                        <p className='text-sm pt-2 text-red-500'>{error}</p>
+                    }
                   <hr className="my-4 text-slate-200"/>
 
                   <div className="mb-4">
