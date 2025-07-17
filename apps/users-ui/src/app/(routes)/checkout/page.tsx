@@ -8,7 +8,9 @@ import { Elements } from '@stripe/react-stripe-js'
 import CheckoutForm from "apps/users-ui/src/shared/components/CheckoutForm";
 
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY)
+  : null;
 
 
 
@@ -117,19 +119,23 @@ const CheckoutPageContent = () => {
 
 
   return (
-    clientSecret && (
+
+    clientSecret && stripePromise ? (
         <Elements
-            stripe={stripePromise}
-            options={{ clientSecret, appearance }}
+        stripe={stripePromise}
+        options={{ clientSecret, appearance }}
         >
-            
-            <CheckoutForm
-                clientSecret={clientSecret}
-                cartItems={cartItems}
-                coupon={coupon}
-                sessionId={sessionId}
-            />
+        <CheckoutForm
+            clientSecret={clientSecret}
+            cartItems={cartItems}
+            coupon={coupon}
+            sessionId={sessionId}
+        />
         </Elements>
+    ) : (
+        <div className="flex justify-center items-center min-h-[70vh]">
+        <Loader2 className="animate-spin h-12 w-12 text-blue-600" />
+        </div>
     )
   )
 }

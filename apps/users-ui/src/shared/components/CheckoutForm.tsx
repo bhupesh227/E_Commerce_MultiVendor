@@ -72,7 +72,7 @@ const CheckoutForm = ({
                     ))}
 
                     <div className='flex justify-between font-semibold pt-2 border-t border-t-gray-300 mt-2'>
-                        {!! coupon?.discountAmount && (
+                        {!!coupon?.discountAmount && (
                             <>
                                 <span>Discount</span>
                                 <span className='text-green-600'>

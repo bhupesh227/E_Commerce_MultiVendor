@@ -7,7 +7,11 @@ import crypto from "crypto";
 import Stripe from "stripe";
 import { Prisma } from "@prisma/client";
 import { sendEmail } from "../utils/send-email";
+import dotenv from "dotenv";
 
+
+
+dotenv.config({path: ".env"});
 
 
 
@@ -22,7 +26,7 @@ export const createPaymentIntent = async (req: any, res: Response, next: NextFun
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount: customerAmount,
-            currency: "usd",
+            currency: "inr",
             payment_method_types: ['card'],
             application_fee_amount: platformFee,
             transfer_data: {
@@ -311,7 +315,7 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
                     "order-confirmation", 
                     {
                         name,
-                        cart,
+                        items:cart,
                         totalAmount: coupon?.discountAmount
                             ? totalAmount - coupon?.discountAmount
                             : totalAmount,
@@ -333,7 +337,7 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
 
                 for (const shop of sellerShops) {
                     const firstProduct = shopGrouped[shop.id][0];
-                    const productTitle = firstProduct?.title || "new item";
+                    const productTitle = firstProduct?.title || "new item" + firstProduct.id;
 
                     await prisma.notifications.create({
                         data: {
@@ -346,15 +350,15 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
                     });
                 }
 
-                await prisma.notifications.create({
-                    data: {
-                        title: "Platform Order Alert",
-                        message: `A new Order was placed by ${name}`,
-                        creatorId: userId,
-                        receiverId: "admin",
-                        redirect_link: `http://localhost:3000/order/${sessionId}`
-                    }
-                });
+                // await prisma.notifications.create({
+                //     data: {
+                //         title: "Platform Order Alert",
+                //         message: `A new Order was placed by ${name}`,
+                //         creatorId: userId,
+                //         receiverId: "admin",
+                //         redirect_link: `http://localhost:3000/order/${sessionId}`
+                //     }
+                // });
 
                 await redis.del(sessionKey);
             }
