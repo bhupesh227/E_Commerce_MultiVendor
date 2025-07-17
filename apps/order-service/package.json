@@ -1,5 +1,5 @@
 {
-  "name": "@./order-service",
+  "name": "order-service",
   "version": "0.0.1",
   "private": true,
   "nx": {
@@ -11,15 +11,15 @@
           "build"
         ],
         "options": {
-          "buildTarget": "@./order-service:build",
+          "buildTarget": "order-service:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@./order-service:build:development"
+            "buildTarget": "order-service:build:development"
           },
           "production": {
-            "buildTarget": "@./order-service:build:production"
+            "buildTarget": "order-service:build:production"
           }
         }
       }

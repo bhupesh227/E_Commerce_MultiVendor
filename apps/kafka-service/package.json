@@ -1,5 +1,5 @@
 {
-  "name": "@./kafka-service",
+  "name": "kafka-service",
   "version": "0.0.1",
   "private": true,
   "nx": {
@@ -11,15 +11,15 @@
           "build"
         ],
         "options": {
-          "buildTarget": "@./kafka-service:build",
+          "buildTarget": "kafka-service:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@./kafka-service:build:development"
+            "buildTarget": "kafka-service:build:development"
           },
           "production": {
-            "buildTarget": "@./kafka-service:build:production"
+            "buildTarget": "kafka-service:build:production"
           }
         }
       }
