@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { CookieOptions, NextFunction, Request, Response } from "express";
 import { checkOtpRestrictions, handleForgotPassword, sendOtp, trackOtpRequests, validateRegistrationData, verifyOtp, verifyUserForgotPasswordOTP } from "../utils/auth.helper";
 import prisma from "@packages/libs/prisma";
 import { AuthError, NotFoundError, ValidationError } from "@packages/error-handler";
@@ -563,3 +563,33 @@ export const updateUserPassword = async (req: any, res: Response, next: NextFunc
     next(error); 
   }
 };
+
+
+export const logout = async (req: any, res: Response) => {
+  try {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    const cookieOptions :CookieOptions = {
+      httpOnly: true,
+      sameSite: isProduction ? 'none' : 'lax' ,
+      secure: isProduction,
+      path: '/',
+    };
+    
+    res.clearCookie("access_token", cookieOptions);
+    res.clearCookie("refresh_token", cookieOptions);
+    res.clearCookie("seller_access_token", cookieOptions);
+    res.clearCookie("seller_refresh_token", cookieOptions);
+
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error during logout",
+    });
+  }
+};
+

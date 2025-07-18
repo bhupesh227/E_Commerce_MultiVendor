@@ -36,11 +36,14 @@ const ProfilePageContent = () => {
     }, [activeTab]);
 
     const logOutHandler = async () => {
-        await axiosInstance.get("/api/logout-user").then((res) => {
+        try {
+            await axiosInstance.post("/api/logout"); 
             queryClient.invalidateQueries({ queryKey: ['user'] });
             router.push("/login");
-            toast.success("Logged out successfully");
-        });
+            toast.success("Logged out Successfully");
+        } catch (error) {
+            toast.error("Failed to log out");
+        }
     };
 
     const { data: orders = [] } = useQuery({
