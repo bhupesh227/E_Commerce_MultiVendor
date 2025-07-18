@@ -57,7 +57,6 @@ export const verifyUser = async (
   }
 };
 
-//login 
 
 export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -425,8 +424,6 @@ export const getSeller = async (req: any, res: Response, next: NextFunction) => 
 }; 
 
 
-
-
 export const addUserAddress = async (req: any, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?.id;
@@ -565,7 +562,7 @@ export const updateUserPassword = async (req: any, res: Response, next: NextFunc
 };
 
 
-export const logout = async (req: any, res: Response) => {
+export const logOutUser = async (req: any, res: Response) => {
   try {
     const isProduction = process.env.NODE_ENV === 'production';
 
@@ -578,12 +575,10 @@ export const logout = async (req: any, res: Response) => {
     
     res.clearCookie("access_token", cookieOptions);
     res.clearCookie("refresh_token", cookieOptions);
-    res.clearCookie("seller_access_token", cookieOptions);
-    res.clearCookie("seller_refresh_token", cookieOptions);
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
-      message: "Logged out successfully",
+      message: "User Logged out successfully",
     });
   } catch (error) {
     res.status(500).json({
@@ -593,3 +588,103 @@ export const logout = async (req: any, res: Response) => {
   }
 };
 
+
+export const logOutSeller = async (req: any, res: Response) => {
+  res.clearCookie("seller_access_token");
+  res.clearCookie("seller_refresh_token");
+  res.status(201).json({
+    success: true,
+    message: "Seller Logged out successfully",
+  });
+}
+
+
+export const loginAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+          throw new ValidationError("Email and password are required");
+      }
+
+      const user = await prisma.users.findUnique({ where: { email } });
+
+      if (!user) {
+          throw new AuthError("User does not exist!");
+      }
+
+      const isPasswordMatch = await bcrypt.compare(password, user.password!);
+      if (!isPasswordMatch) {
+          throw new AuthError("Invalid email or Password");
+      }
+
+      const isAdmin = user.role === 'admin';
+
+      if(!isAdmin){
+        // sendLog({
+        //   type: 'error',
+        //   message: `Admin login failed for ${email} - not an admin`,
+        //   source: 'auth-service',
+        // });
+          throw new AuthError("Invalid access!");
+      }
+
+      // sendLog({
+      //     type: "success",
+      //     message: `Admin login successful for ${email}`,
+      //     source: "auth-service",
+      // });
+
+      res.clearCookie('seller_access_token');
+      res.clearCookie('seller_refresh_token');
+
+      const accessToken = jwt.sign(
+          { id: user.id, role: 'admin' },
+          process.env.ACCESS_TOKEN_SECRET as string,
+          {
+              expiresIn: '15m'
+          }
+      );
+
+      const refreshToken = jwt.sign(
+          { id: user.id, role: 'admin' },
+          process.env.REFRESH_TOKEN_SECRET as string,
+          {
+              expiresIn: '7d'
+          }
+      );
+
+      setCookie(res, "refresh_token", refreshToken);
+      setCookie(res, "access_token", accessToken);
+
+      res.status(200).json({
+          message: "Login successful",
+          user: { id: user.id, email: user.email, name: user.name }
+      });
+
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export const logoutAdmin = async (req: any, res: Response) => {
+  res.clearCookie("access_token");
+  res.clearCookie("refresh_token");
+
+  res.status(200).json({
+    success: true,
+    message: "Admin logged out successfully",
+  });
+}
+
+export const getAdmin = async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const admin = req.admin;
+    if (!admin) {
+      return next(new NotFoundError("Admin not found"));
+    }
+    res.status(200).json({ success: true, admin });
+  } catch (error) {
+    next(error);
+  }
+};

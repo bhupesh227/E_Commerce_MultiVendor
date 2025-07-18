@@ -23,6 +23,7 @@ model users{
   id            String        @id @default(auto()) @map("_id") @db.ObjectId 
   name          String
   email         String        @unique
+  role          String        @default("user")
   password      String?
   following     String[]
   avatar        images[]

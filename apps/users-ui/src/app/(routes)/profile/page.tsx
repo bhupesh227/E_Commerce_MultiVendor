@@ -37,10 +37,12 @@ const ProfilePageContent = () => {
 
     const logOutHandler = async () => {
         try {
-            await axiosInstance.post("/api/logout"); 
-            queryClient.invalidateQueries({ queryKey: ['user'] });
-            router.push("/login");
-            toast.success("Logged out Successfully");
+            await axiosInstance.get("/api/logout-user").then((res) => {
+                queryClient.invalidateQueries({ queryKey: ['user'] });
+                router.push("/login");
+                toast.success("Logged out Successfully");
+            });
+            
         } catch (error) {
             toast.error("Failed to log out");
         }
