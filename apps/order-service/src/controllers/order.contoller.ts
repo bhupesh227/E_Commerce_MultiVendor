@@ -605,3 +605,28 @@ export const getUserOrders = async (req: any, res: Response, next: NextFunction)
         return next(error);
     }
 }
+
+
+export const getAdminOrders = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const orders = await prisma.orders.findMany({
+            include: {
+                user: true,
+                shop: true,
+            },
+            orderBy :{
+                createdAt: "desc",
+            }
+        });
+        if (!orders || orders.length === 0) {
+            return next(new NotFoundError("No orders found"));
+        }
+        res.status(200).json({
+            success: true,
+            orders,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}

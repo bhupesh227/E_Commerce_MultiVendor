@@ -195,10 +195,14 @@ export const handleRefreshToken = async (req: any, res: Response, next: NextFunc
         where: { id: decoded.id },
         include: { shop: true },
       });
+    }else if (decoded.role === 'admin') {
+      account = await prisma.users.findUnique({ 
+        where: { id: decoded.id , role: "admin"} 
+      });
     }
 
     if (!account) {
-      return new AuthError(`Forbidden! User/Seller not found!`);
+      return new AuthError(`Forbidden! User/Seller/Admin not found!`);
     }
 
     const newAccessToken = jwt.sign(
@@ -211,6 +215,8 @@ export const handleRefreshToken = async (req: any, res: Response, next: NextFunc
       setCookie(res, 'access_token', newAccessToken);
     } else if (decoded.role === 'seller') {
       setCookie(res, 'seller_access_token', newAccessToken);
+    }else if (decoded.role === 'admin') {
+      setCookie(res, 'access_token', newAccessToken);
     }
 
     req.role = decoded.role;
