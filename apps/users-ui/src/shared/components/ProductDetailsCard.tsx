@@ -10,6 +10,8 @@ import useUser from '../../hooks/useUser';
 import useLocationTracking from '../../hooks/useLocation';
 import useDeviceTracking from '../../hooks/useDevice';
 import { useStore } from '../../store';
+import axiosInstance from '../../utils/axiosInstance';
+import { isProtected } from '../../utils/isProtected';
 
 
 interface Props {
@@ -22,6 +24,7 @@ const ProductDetailsCard = ({  setOpen, data }: Props) => {
     const [isSelectedColor, setIsSelectedColor] = useState<string>('');
     const [selectedSize, setSelectedSize] = useState<string>('');
     const [quantity, setQuantity] = useState<number>(1);
+    const [isLoading, setIsLoading] = useState(false);
 
 
     const router = useRouter();
@@ -40,6 +43,23 @@ const ProductDetailsCard = ({  setOpen, data }: Props) => {
 
     const estimatedDelivery = new Date();
     estimatedDelivery.setDate(estimatedDelivery.getDate() + 5);
+
+    const handleChat = async() => {
+        if(isLoading) return;
+
+        setIsLoading(true);
+        try {
+            const response = await axiosInstance.post('/chatting/api/create-user-conversationGroup', 
+                {sellerId: data?.shop?.sellerId},
+                isProtected
+            );
+            router.push(`/inbox?conversationId=${response.data.conversation.id}`);
+        } catch (error) {
+            console.error('Error creating conversation:', error);
+        } finally{
+            setIsLoading(false);
+        }
+    }
 
   return (
     <div
@@ -115,7 +135,7 @@ const ProductDetailsCard = ({  setOpen, data }: Props) => {
                         </div>
                         <button
                             className="flex cursor-pointer items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 font-medium transition text-white mt-2"
-                            onClick={() => router.push(`/inbox?shopId=${data?.shop?.id}`)}
+                            onClick={() => handleChat()}
                         >
                             Seller<MessageCircle size={20} />
                         </button>
