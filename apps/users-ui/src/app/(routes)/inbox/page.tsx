@@ -84,6 +84,46 @@ const InboxPageContent = () => {
       }
     },[messages]);
 
+    useEffect(() => {
+      if (!ws) return;
+        
+      ws.onmessage = (event:any) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'NEW_MESSAGE') {
+          const newMsg = data?.payload;
+          if(newMsg.conversationId === conversationId) {
+            queryClient.setQueryData(['messages', conversationId], (old: any = []) => [
+                ...old, 
+                {
+                    content : newMsg.content ,
+                    senderType : newMsg.senderType,
+                    seen : false,
+                    createdAt : newMsg.createdAt || new Date().toISOString(),
+                }
+            ]);
+            scrollToBottom();
+          }
+          setChats((prevChats) => 
+            prevChats.map((chat) => 
+              chat.conversationId === newMsg.conversationId
+                ? { ...chat , lastMessage :newMsg.content}
+                : chat
+            )
+          );
+        }
+        if (data.type === 'UNSEEN_COUNT_UPDATE') {
+          const {conversationId , count }= data.payload;
+          setChats((prevChats) => 
+            prevChats.map((chat) => 
+              chat.conversationId === conversationId 
+                ? { ...chat, unreadCount: count }
+                : chat
+            )
+          );
+        }
+      };      
+    }, [ws, queryClient]);
+
     const getLastMessage = (chat: any) => chat?.lastMessage || "";
 
     const handleChatSelect = (chat: any) => {
@@ -114,30 +154,18 @@ const InboxPageContent = () => {
       if (!message.trim() || !selectedChat) return; 
 
       const payload = {
-        conversationId: selectedChat.conversationId,
+        conversationId: selectedChat?.conversationId,
         fromUserId: user?.id,
-        toUserId : selectedChat.seller?.id,
+        toUserId : selectedChat?.seller?.id,
         messageBody : message,
         senderType: "user",
       };
 
       ws?.send(JSON.stringify(payload));
-      queryClient.setQueryData(
-        ["messages", selectedChat.conversationId],
-        (old :any[]) => [
-          ...old,
-          {
-            content : payload.messageBody,
-            senderType: "user",
-            createdAt: new Date().toISOString(),
-            seen : false,
-          }
-        ]
-      );
 
       setChats((prevChats) =>
         prevChats.map((chat) =>
-          chat.conversationId 
+          chat.conversationId === selectedChat?.conversationId
             ? {
                 ...chat,
                 lastMessage: payload.messageBody,
@@ -171,10 +199,6 @@ const InboxPageContent = () => {
                   ) : (
                     chats.map((chat) => {
                       const isActive = selectedChat?.conversationId === chat.conversationId;
-                      const avatarUrl =
-                        Array.isArray(chat.seller?.avatar) && chat.seller.avatar.length > 0
-                          ? chat.seller.avatar[0]?.url || '/defaultprofile.jpg'
-                          : '/defaultprofile.jpg';
                       return (
                         <button
                             key={chat.conversationId}
@@ -183,7 +207,7 @@ const InboxPageContent = () => {
                         >
                           <div className='flex items-center gap-2'>
                             <Image
-                              src={avatarUrl}
+                              src={chat.seller?.avatar?.[0] || '/defaultprofile.jpg'}
                               alt={chat.seller?.name || 'Seller Avatar'}
                               width={40}
                               height={40}
@@ -197,10 +221,20 @@ const InboxPageContent = () => {
                                 {chat.seller?.isOnline && (
                                   <span className='text-green-500 rounded-full w-2 h-2'/>
                                 )}
+                                {chat.seller?.isOnline && (
+                                  <span className='ml-1 w-2 h-2 bg-green-500 rounded-full inline-block'/>
+                                )}
                               </div>
+                              <div className='flex items-center justify-between mt-1'>
                                 <p className='text-gray-600 text-sm truncate max-w-[170px]'>
                                   {getLastMessage(chat)}
                                 </p>
+                                {chat.unreadCount > 0 && (
+                                  <span className='bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded-full'>
+                                    {chat?.unreadCount}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </button>
