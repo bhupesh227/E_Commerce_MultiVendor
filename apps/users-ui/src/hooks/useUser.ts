@@ -1,17 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '../utils/axiosInstance';
 import { useAuthStore } from '../store/useAuthStore';
-import { isProtected } from '../utils/isProtected';
+import { isProtected, isPublic } from '../utils/isProtected';
 
 
 
 const fetchUser = async (isLoggedIn: boolean) => {
-  const config = isLoggedIn ? isProtected : {};
-  const response = await axiosInstance.get(`/api/logged-in-user`,config);
-  if (!response?.data?.user) {
-    throw new Error("User not found");
+  const config = isLoggedIn ? isProtected :isPublic;
+  try {
+    const response = await axiosInstance.get(`/api/logged-in-user`, config);
+    return response.data?.user || null;
+  } catch (error) {
+    return null;
   }
-  return response.data.user;
 };
 
 const useUser = () => {
@@ -27,8 +28,8 @@ const useUser = () => {
     staleTime: 1000 * 60 * 5,   
     retry: false,
     // @ts-ignore
-    onSuccess: () => {
-      setLoggedIn(true);
+    onSuccess: (userData) => {
+      setLoggedIn(!!userData);
     },
     onError: () => {
       setLoggedIn(false); 
