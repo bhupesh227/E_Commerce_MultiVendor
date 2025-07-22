@@ -12,6 +12,8 @@ import useLocationTracking from '../../hooks/useLocation';
 import useDeviceTracking from '../../hooks/useDevice';
 import ProductCard from '../components/ProductCard';
 import axiosInstance from '../../utils/axiosInstance';
+import { isProtected } from '../../utils/isProtected';
+import { useRouter } from 'next/navigation';
 
 const ProductDetails = ({ productDetails }: { productDetails: any }) => {
  
@@ -22,10 +24,12 @@ const ProductDetails = ({ productDetails }: { productDetails: any }) => {
     const [quantity, setQuantity] = useState(1);
     const [recommendedProducts, setRecommendedProducts] = useState([]);
     const [priceRange, ] = useState([productDetails?.salePrice, 1199]);
+    const [isChatLoading, setIsChatLoading] = useState(false);
 
     const {user} = useUser();
     const location = useLocationTracking();
     const deviceInfo = useDeviceTracking();
+    const router = useRouter();
 
     const addToCart = useStore((state: any) => state.addToCart);
     const cart = useStore((state:any) => state.cart);
@@ -75,6 +79,23 @@ const ProductDetails = ({ productDetails }: { productDetails: any }) => {
     useEffect(() => {
         fetchFilteredProducts();
     }, [priceRange]);
+
+    const handleChat = async() => {
+        if(isChatLoading) return;
+
+        setIsChatLoading(true);
+        try {
+            const response = await axiosInstance.post('/chatting/api/create-user-conversationGroup', 
+                {sellerId: productDetails?.shop?.sellerId},
+                isProtected
+            );
+            router.push(`/inbox?conversationId=${response.data.conversation.id}`);
+        } catch (error) {
+            console.error('Error creating conversation:', error);
+        } finally{
+            setIsChatLoading(false);
+        }
+    }
 
 
   return (
@@ -331,6 +352,7 @@ const ProductDetails = ({ productDetails }: { productDetails: any }) => {
                             </div>
                             <Link
                                 href={"#"}
+                                onClick={handleChat}
                                 className='text-blue-500 text-sm flex items-center gap-1'
                             >
                                 <MessageSquareText />
