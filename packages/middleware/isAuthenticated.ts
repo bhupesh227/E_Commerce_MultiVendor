@@ -35,7 +35,11 @@ const isAuthenticated = async (req: any, res: Response, next: NextFunction) => {
       account = await prisma.sellers.findUnique({
         where: { id: decoded.id },
         include:{
-          shop:true
+          shop: {
+            include: {
+              avatar: true
+            }
+          }
         }
       });
       req.seller = account;
