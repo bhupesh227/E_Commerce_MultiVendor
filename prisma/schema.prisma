@@ -31,6 +31,7 @@ model users{
   updatedAt     DateTime      @updatedAt
   shopReviews   shopReviews[]
   orders        orders[]
+  followings    followers[]
 }
 
 
@@ -72,6 +73,7 @@ model shops {
   isDeleted     Boolean       @default(false)
   deletedAt     DateTime?
   orders        orders[]
+  followers     followers[]
 }
 
 model shopReviews {
@@ -269,4 +271,13 @@ model message {
   status          String    @default("sent")
   createdAt       DateTime  @default(now())
   @@unique([conversationId, senderId, createdAt, content])
+}
+
+model followers {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @db.ObjectId
+  shopsId   String    @db.ObjectId
+  user      users     @relation(fields: [userId], references: [id])
+  shops     shops?    @relation(fields: [shopsId], references: [id])
+  @@unique([userId, shopsId])
 }
