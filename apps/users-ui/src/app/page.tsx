@@ -84,7 +84,7 @@ const page = () => {
               ))}
             </div>
           )}
-          {!LatestProductsLoading && latestProducts.length === 0 && (
+          {!LatestProductsLoading && latestProducts?.length === 0 && (
             <p className='text-center'>
               No Product Available yet
             </p>

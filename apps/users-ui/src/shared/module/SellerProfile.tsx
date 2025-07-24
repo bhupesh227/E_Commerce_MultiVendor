@@ -108,7 +108,7 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
           <div className='flex flex-col md:flex-row items-center md:items-start gap-4'>
             <div className='relative w-[100px] h-[100px] rounded-full border-4 border-slate-300 overflow-hidden'>
               <Image
-                src={shop?.avatar[0] || "/default-profile.jpg"}
+                src={shop?.avatar || "/default-profile.jpg"}
                 alt="Seller Avatar"
                 layout='fill'
                 objectFit='cover'
@@ -209,7 +209,7 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
               {products?.map((product:any) => (
                 <ProductCard key={product.id} product={product} />
               ))}
-              { products.length === 0 && (
+              { products?.length === 0 && (
                 <p className='py-2'>No products found Yet.</p>
               )}
             </div>
