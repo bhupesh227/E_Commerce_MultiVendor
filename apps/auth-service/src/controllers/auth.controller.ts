@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import { setCookie } from "../utils/cookies/setCookie";
 import stripe from "@packages/libs/stripe";
+import { sendLogs } from "@packages/utils/logs/send-logs";
 
 export const userRegistration = async (req:Request, res:Response,next:NextFunction)=>{
 try {
@@ -231,6 +232,11 @@ export const handleRefreshToken = async (req: any, res: Response, next: NextFunc
 export const getUser = async (req: any, res: Response, next: NextFunction) => {
   try {
     const user = req.user;
+    await sendLogs({
+      type: 'info',
+      message: `User data retrieved successfully ${user?.email}`,
+      source: 'auth-service',
+    });
     res.status(200).json({ success: true, user });
   } catch (error) {
     next(error);

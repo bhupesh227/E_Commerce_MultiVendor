@@ -217,6 +217,8 @@ export const createProduct = async (req: any, res: Response, next: NextFunction)
                 colors: colors || [],
                 sizes: sizes || [],
                 shopId: req.seller.shop.id,
+                startingDate:null,
+                endingDate: null,
             },
             include: {
                 images: true,

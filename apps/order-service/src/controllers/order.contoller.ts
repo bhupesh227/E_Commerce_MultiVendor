@@ -8,6 +8,7 @@ import Stripe from "stripe";
 import { Prisma } from "@prisma/client";
 import { sendEmail } from "../utils/send-email";
 import dotenv from "dotenv";
+import { sendLogs } from "@packages/utils/logs/send-logs";
 
 
 
@@ -585,6 +586,11 @@ export const verifyCouponCode = async (req: any, res: Response, next: NextFuncti
 
 export const getUserOrders = async (req: any, res: Response, next: NextFunction) => {
     try {
+        await sendLogs({
+            type: 'success',
+            message: `User orders fetched successfully for ${req.user?.email}`,
+            source: 'order-service',
+        });
         const orders = await prisma.orders.findMany({
             where: {
                 userId: req.user.id,
