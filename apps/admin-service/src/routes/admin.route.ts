@@ -1,7 +1,7 @@
 import { isAdmin } from "@packages/middleware/AuthorizeRole";
 import isAuthenticated from "@packages/middleware/isAuthenticated";
 import express,{ Router } from "express";
-import { addNewAdmin, getAllAdmins, getAllCustomizations, getAllEvents, getAllProducts, getAllSellers, getAllUsers } from "../controllers/admin.controller";
+import { addNewAdmin, getAllAdmins, getAllCustomizations, getAllEvents, getAllNotifications, getAllProducts, getAllSellers, getAllUsers, getAllUsersNotifications } from "../controllers/admin.controller";
 
 
 
@@ -17,8 +17,7 @@ router.put('/add-new-admin', isAuthenticated, isAdmin, addNewAdmin);
 router.get('/get-all-users', isAuthenticated, isAdmin, getAllUsers);
 router.get('/get-all-sellers', isAuthenticated, isAdmin, getAllSellers);
 router.get('/get-all', getAllCustomizations);
-
-
-
+router.get('/get-all-notifications', isAuthenticated, isAdmin, getAllNotifications);
+router.get('/get-user-notifications', isAuthenticated, getAllUsersNotifications);
 
 export default router;

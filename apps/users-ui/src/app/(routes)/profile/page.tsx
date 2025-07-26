@@ -11,6 +11,7 @@ import StatCard from 'apps/users-ui/src/shared/components/StatCard';
 import axiosInstance from 'apps/users-ui/src/utils/axiosInstance';
 import { BadgeCheck, Bell, CheckCircle, Clock, Gift, Inbox, Loader2, Lock, LogOut, MapPin, Pencil, PhoneCall, Receipt, Settings, ShoppingBag, Truck, User } from 'lucide-react'
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -65,6 +66,18 @@ const ProfilePageContent = () => {
     const completeOrders = orders.filter(
         (o: any) => o?.deliveryStatus === "Delivered"
     ).length;
+
+    const {data: notifications , isLoading: isLoadingNotifications} = useQuery({
+        queryKey: ['notifications'],
+        queryFn: async () => {
+            const response = await axiosInstance.get('/admin/api/get-user-notifications');
+            return response.data.notifications;
+        }
+    });
+
+    const markAsRead = async (notificationId: string) => {
+        await axiosInstance.post('/seller/api/mark-notification-as-read', { notificationId });
+    }
 
   return (
     <div className='bg-gray-50 p-6 pb-14'>
@@ -173,8 +186,36 @@ const ProfilePageContent = () => {
                                 <OrdersTable/>
                             ) : activeTab === "Change Password" ? (
                                 <ChangePassword />
+                            ) : activeTab === "Notifications" ? (
+                                <div className='space-y-4 text-sm text-gray-700'>
+                                    {!isLoadingNotifications && notifications.length === 0 && (
+                                        <p className='text-gray-500'>No notifications found.</p>
+                                    )}
+
+                                    {!isLoadingNotifications && notifications.length > 0 && (
+                                        <div className='w-full md:w-[80%] mx-auto mt-8 rounded-lg divide-y divide-gray-700 bg-black/40 backdrop-blur-lg shadow-sm'>
+                                            {notifications.map((notification:any) => (
+                                                <Link
+                                                    key={notification.id}
+                                                    href={`${notification.redirect_link}`}
+                                                    className={`block p-4 transition-colors ${notification.isRead !== false ? ' hover:bg-gray-700/40' : 'hover:bg-gray-800/40  '} text-white`}
+                                                    onClick={() => markAsRead(notification.id)}
+                                                >
+                                                    <div className='flex items-center gap-3'>
+                                                        <div className='flex flex-col'>
+                                                            <span className='font-semibold'>{notification.title}</span>
+                                                            <span className='text-gray-400'>{notification.message}</span>
+                                                            <span className='text-gray-500 text-xs'>{new Date(notification.createdAt).toLocaleString("en-UK", { dateStyle: "medium", timeStyle: "short" })}</span>
+                                                        </div>
+                                                    </div>
+                                                
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             ) : (
-                                <></>
+                                <p>Not Found</p>
                             )
                         )
                     }

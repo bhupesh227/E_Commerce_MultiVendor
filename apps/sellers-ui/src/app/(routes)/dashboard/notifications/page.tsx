@@ -1,7 +1,8 @@
 "use client";
 import { useQuery } from '@tanstack/react-query';
-import BreadCrumbs from 'apps/admin-ui/src/shared/components/BreadCrumbs';
-import axiosInstance from 'apps/admin-ui/src/utils/axiosInstance';
+import axiosInstance from 'apps/sellers-ui/src/utils/axiosInstance';
+import { ChevronRight } from 'lucide-react';
+
 import Link from 'next/link';
 import React from 'react';
 
@@ -9,7 +10,7 @@ const NotificationPage = () => {
   const {data , isLoading} = useQuery({
     queryKey: ['notifications'],
     queryFn: async () => {
-      const response = await axiosInstance.get('/admin/api/get-all-notifications');
+      const response = await axiosInstance.get('/seller/api/seller-notifications');
       return response.data.notifications;
     },
   });
@@ -22,7 +23,13 @@ const NotificationPage = () => {
         <h1 className="text-2xl font-bold mb-4">Notifications</h1>
         <p className="text-gray-500">This page will display notifications related to the admin dashboard.</p>
         <div className="mt-1">
-            <BreadCrumbs title='Notifications' />
+            <div className="flex items-center text-lg py-4">
+                <Link href="/dashboard" className="text-[#80deea] cursor-pointer font-medium">
+                    Dashboard
+                </Link>
+                <ChevronRight size={20} className="opacity-[0.98] text-white"  />
+                <span className='underline text-[#55585b]'>Notifications</span>
+            </div>
         </div>
         
         {!isLoading && data.length === 0 && (

@@ -233,7 +233,7 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
                     }
                 }
 
-                await prisma.orders.create({
+                const order = await prisma.orders.create({
                     data: {
                         userId,
                         shopId,
@@ -320,7 +320,7 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
                         totalAmount: coupon?.discountAmount
                             ? totalAmount - coupon?.discountAmount
                             : totalAmount,
-                        trackingUrl: `http://localhost:3000/order/${sessionId}`,
+                        trackingUrl: `http://localhost:3000/order/${order.id}`,
                     }
                 );
 
@@ -346,20 +346,38 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
                             message: `A customer just ordered ${productTitle} from your shop`,
                             creatorId: userId,
                             receiverId: shop.sellerId,
-                            redirect_link: `http://localhost:3000/order/${sessionId}`
+                            redirect_link: `/order/${order.id}`
                         }
                     });
                 }
 
-                // await prisma.notifications.create({
-                //     data: {
-                //         title: "Platform Order Alert",
-                //         message: `A new Order was placed by ${name}`,
-                //         creatorId: userId,
-                //         receiverId: "admin",
-                //         redirect_link: `http://localhost:3000/order/${sessionId}`
-                //     }
-                // });
+                await prisma.notifications.create({
+                    data: {
+                        title: "New Order Placed",
+                        message: `A new order has been placed by ${name} (${email})`,
+                        creatorId: userId,
+                        receiverId: userId,
+                        redirect_link: `/order/${order.id}`
+                    }
+                });
+
+                const adminIds = await prisma.users.findMany({
+                    where: {
+                        role: "admin"
+                    }
+                });
+
+                for (const admin of adminIds) {
+                    await prisma.notifications.create({
+                        data: {
+                            title: "New Order Placed",
+                            message: `A new order has been placed by ${name} (${email})`,
+                            creatorId: userId,
+                            receiverId: admin.id,
+                            redirect_link: `/order/${order.id}`
+                        }
+                    });
+                }
 
                 await redis.del(sessionKey);
             }
