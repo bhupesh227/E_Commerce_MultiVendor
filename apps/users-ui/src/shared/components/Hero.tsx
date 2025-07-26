@@ -4,9 +4,11 @@ import { MoveRight } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'
 import React from 'react'
+import useLayout from '../../hooks/useLayout';
 
 const Hero = () => {
     const router = useRouter();
+    const { layout } = useLayout();
 
   return (
     <div className="bg-[#115061] h-[95vh] flex flex-col justify-center w-full">
@@ -30,7 +32,7 @@ const Hero = () => {
             </div>
             <div className="md:w-1/2">
                 <Image
-                    src="/hero-image.png"
+                    src={layout?.banner || "/hero-image.png"}
                     alt="banner"
                     width={450}
                     height={450}

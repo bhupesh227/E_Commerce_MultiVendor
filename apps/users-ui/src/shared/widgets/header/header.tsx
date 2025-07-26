@@ -6,11 +6,14 @@ import Logo from 'apps/users-ui/src/assets/Logo';
 import HeaderBottom from './header-bottom';
 import useUser from 'apps/users-ui/src/hooks/useUser';
 import { useStore } from 'apps/users-ui/src/store';
+import useLayout from 'apps/users-ui/src/hooks/useLayout';
+import Image from 'next/image';
 
 const Header = () => {
   const { user, isLoading } = useUser();
   const cart = useStore((state) => state.cart);
   const wishlist = useStore((state) => state.wishlist);
+  const {layout} = useLayout();
 
 
   return (
@@ -18,9 +21,7 @@ const Header = () => {
       <div className="w-[80%] py-5 m-auto flex items-center justify-between">
         <div>
           <Link href="/">
-            <span className="text-2xl font-[500]">
-              <Logo/>
-            </span>
+            <Image src={layout?.logo || <Logo />} alt="Logo" width={300} height={100}  className='object-cover h-[70px] ml-[-50px] mb-[-30px]'/>
           </Link>
         </div>
 
