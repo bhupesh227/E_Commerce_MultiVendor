@@ -6,7 +6,7 @@ import useUser from '../hooks/useUser';
 import { WebSocketProvider } from '../context/web-socket-context';
 
 interface Props {
-  children?: ReactNode;
+  children: ReactNode;
 }
 
 const Providers = ({ children }: Props) => {
@@ -30,11 +30,8 @@ const Providers = ({ children }: Props) => {
 
 
 const ProviderWithWebSocket = ({children}:{ children: ReactNode }) => {
-  const  {user ,isLoading} = useUser();
-  if (isLoading) {
-    return <div>Loading...</div>; 
-  }
-  
+  const  {user } = useUser();
+
   return (
     <>
       {user ? (

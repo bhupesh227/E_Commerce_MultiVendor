@@ -10,7 +10,7 @@ const NotificationPage = () => {
     queryKey: ['notifications'],
     queryFn: async () => {
       const response = await axiosInstance.get('/admin/api/get-all-notifications');
-      return response.data.notifications;
+      return response.data.notifications || [];
     },
   });
 
@@ -25,12 +25,12 @@ const NotificationPage = () => {
             <BreadCrumbs title='Notifications' />
         </div>
         
-        {!isLoading && data.length === 0 && (
+        {!isLoading && data?.length === 0 && (
           <div className="mt-8">
             <p className="text-gray-400 text-center font-Poppins">No notifications yet.</p>
           </div>
         )}
-        {!isLoading && data.length > 0 && (
+        {!isLoading && data?.length > 0 && (
           <div className='w-full md:w-[80%] mx-auto mt-8 rounded-lg divide-y divide-gray-700 bg-black/40 backdrop-blur-lg shadow-sm'>
             {data.map((notifications:any) => (
               <Link

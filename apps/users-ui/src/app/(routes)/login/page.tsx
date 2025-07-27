@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -22,6 +22,7 @@ const LoginPage = () => {
   const [serverError, setServerError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -36,8 +37,9 @@ const LoginPage = () => {
       });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: async() => {
       setServerError(null);
+      await queryClient.invalidateQueries({ queryKey: ['user'] });
       router.push('/');
     },
     onError: (error: AxiosError) => {

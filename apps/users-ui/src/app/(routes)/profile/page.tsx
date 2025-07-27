@@ -71,7 +71,7 @@ const ProfilePageContent = () => {
         queryKey: ['notifications'],
         queryFn: async () => {
             const response = await axiosInstance.get('/admin/api/get-user-notifications');
-            return response.data.notifications;
+            return response.data.notifications || [];
         }
     });
 
@@ -188,11 +188,11 @@ const ProfilePageContent = () => {
                                 <ChangePassword />
                             ) : activeTab === "Notifications" ? (
                                 <div className='space-y-4 text-sm text-gray-700'>
-                                    {!isLoadingNotifications && notifications.length === 0 && (
+                                    {!isLoadingNotifications && notifications?.length === 0 && (
                                         <p className='text-gray-500'>No notifications found.</p>
                                     )}
 
-                                    {!isLoadingNotifications && notifications.length > 0 && (
+                                    {!isLoadingNotifications && notifications?.length > 0 && (
                                         <div className='w-full md:w-[80%] mx-auto mt-8 rounded-lg divide-y divide-gray-700 bg-black/40 backdrop-blur-lg shadow-sm'>
                                             {notifications.map((notification:any) => (
                                                 <Link

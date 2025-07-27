@@ -46,8 +46,6 @@ axiosInstance.interceptors.response.use(
         const isRetry = originalRequest?._retry;
         const isAuthRequired = originalRequest?.requireAuth === true;
 
-        if (!isAuthRequired) return Promise.reject(error);
-
         if (is401 && !isRetry && isAuthRequired) {
             if (isRefreshing) {
                 return new Promise((resolve) => {
