@@ -2,11 +2,15 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import { errorMiddleware } from '@packages/error-handler/error-middleware';
 import router from './routes/admin.route';
-
-
+import cors from 'cors';
 
 
 const app = express();
+app.use(cors({
+    origin: ['http://localhost:3002'], 
+    credentials: true,
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 

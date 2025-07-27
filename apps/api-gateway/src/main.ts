@@ -5,25 +5,23 @@
 
 import express from 'express';
 import cors from 'cors';
-import proxy from "express-http-proxy";
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import initializeSiteConfig from './libs/initializeSiteConfig';
 import dotenv from 'dotenv';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 dotenv.config();
 const app = express();
 
 app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
-  allowedHeaders: ["Authorization", "Content-Type"],
+
   credentials: true,
 }));
 
 app.use(morgan('dev'));
-app.use(express.json({ limit: '100mb' }));
-app.use(express.urlencoded({ extended: true ,limit: '100mb' }));
 app.use(cookieParser());
 app.set("trust proxy",1);
 
@@ -43,12 +41,12 @@ app.get('/gateway-health', (req, res) => {
   res.send({ message: 'Welcome to api-gateway!' });
 });
 
-app.use('/seller', proxy("http://localhost:6008"));
-app.use("/chatting", proxy("http://localhost:6005"));
-app.use("/admin", proxy("http://localhost:6004"));
-app.use("/order", proxy("http://localhost:6003"));
-app.use("/product", proxy("http://localhost:6002"));
-app.use("/", proxy("http://localhost:6001"));
+app.use('/seller', createProxyMiddleware({ target: "http://localhost:6008", changeOrigin: true }));
+app.use("/chatting", createProxyMiddleware({ target: "http://localhost:6005", changeOrigin: true, ws: true }));
+app.use("/admin", createProxyMiddleware({ target: "http://localhost:6004", changeOrigin: true }));
+app.use("/order", createProxyMiddleware({ target: "http://localhost:6003", changeOrigin: true }));
+app.use("/product", createProxyMiddleware({ target: "http://localhost:6002", changeOrigin: true }));
+app.use("/", createProxyMiddleware({ target: "http://localhost:6001", changeOrigin: true }));
 
 
 const port = process.env.PORT || 8080;

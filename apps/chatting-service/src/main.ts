@@ -4,10 +4,14 @@ import cookieParser from "cookie-parser";
 import { createWebSocketServer } from './websocket';
 import { startConsumer } from './chat-message.consumer';
 import router from './routes/chatting.route';
-
+import cors from 'cors';
 
 
 const app = express();
+app.use(cors({
+    origin: ['http://localhost:3000'], 
+    credentials: true,
+}));
 
 app.use(express.json());
 app.use(cookieParser());
