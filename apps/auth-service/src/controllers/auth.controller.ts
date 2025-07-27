@@ -7,6 +7,8 @@ import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import { setCookie } from "../utils/cookies/setCookie";
 import stripe from "@packages/libs/stripe";
 import { sendLogs } from "@packages/utils/logs/send-logs";
+import { v4 as uuidv4 } from 'uuid';
+import imageKit from "@packages/libs/imagekit";
 
 export const userRegistration = async (req:Request, res:Response,next:NextFunction)=>{
 try {
@@ -709,3 +711,61 @@ export const getLayoutData = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 }
+
+
+export const updateUserAvatar = async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user.id;
+    const file = req.file;
+
+    if (!file) {
+        return next(new ValidationError('No file was uploaded.'));
+    }
+
+    const user = await prisma.users.findUnique({
+        where: { id: userId },
+        select: { avatar: true },
+    });
+
+    if (!user) {
+        return next(new ValidationError('User not found.'));
+    }
+
+    // 2. If an old avatar exists, delete it from ImageKit
+    const oldAvatar = user.avatar as { fileId: string; url: string } | null;
+    if (oldAvatar?.fileId) {
+        try {
+            await imageKit.deleteFile(oldAvatar.fileId);
+        } catch (deleteError) {
+            console.warn(`Could not delete old avatar from ImageKit: ${deleteError}`);
+            // Do not block the upload if deletion fails
+        }
+    }
+
+    // 3. Upload the new file to ImageKit
+    const uniqueFileName = `${uuidv4()}_${file.originalname}`;
+    const response = await imageKit.upload({
+        file: file.buffer,
+        fileName: uniqueFileName,
+        folder: '/users/avatars', 
+    });
+
+    const updatedUser = await prisma.users.update({
+        where: { id: userId },
+        data: {
+            avatar: {
+                url: response.url,
+                fileId: response.fileId,
+            },
+        },
+    });
+
+    res.status(200).json({
+        success: true,
+        message: 'Avatar updated successfully.',
+        avatar: updatedUser.avatar,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

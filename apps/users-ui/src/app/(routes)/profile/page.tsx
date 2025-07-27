@@ -13,7 +13,7 @@ import { BadgeCheck, Bell, CheckCircle, Clock, Gift, Inbox, Loader2, Lock, LogOu
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 
@@ -22,6 +22,8 @@ const ProfilePageContent = () => {
     const searchParams = useSearchParams();
     const queryTab = searchParams.get('active') || "Profile";
     const [activeTab, setActiveTab] = useState(queryTab);
+    const [isUploading, setIsUploading] = useState(false);
+    const avatarInputRef = useRef<HTMLInputElement>(null);
 
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -77,7 +79,31 @@ const ProfilePageContent = () => {
 
     const markAsRead = async (notificationId: string) => {
         await axiosInstance.post('/seller/api/mark-notification-as-read', { notificationId });
-    }
+    };
+
+    const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        const toastId = toast.loading('Uploading your new avatar...');
+
+        try {
+            await axiosInstance.post('/api/update-avatar', formData);
+            // Invalidate user query to refetch data and update the UI
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            
+            toast.success('Avatar updated successfully!', { id: toastId });
+        } catch (error) {
+            toast.error('Failed to update avatar.', { id: toastId });
+            console.error(error);
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
   return (
     <div className='bg-gray-50 p-6 pb-14'>
@@ -157,14 +183,33 @@ const ProfilePageContent = () => {
                             <div className='space-y-4 text-sm text-gray-700'>
                                 <div className='flex items-center gap-3'>
                                     <Image
-                                        src={user?.avatar || "/defaultprofile.jpg"}
+                                        src={(user.avatar as any)?.url || "/defaultprofile.jpg"}
                                         alt='Profile'
                                         width={60}
                                         height={60}
                                         className='w-16 h-16 rounded-full border border-gray-200'
                                     />
-                                    <button className='flex items-center gap-1 text-blue-500 text-xs font-medium'>
-                                        <Pencil className='w-4 h-4' /> Change Photo
+                                    <input
+                                        type="file"
+                                        ref={avatarInputRef}
+                                        onChange={handleAvatarChange}
+                                        accept="image/png, image/jpeg, image/webp"
+                                        style={{ display: 'none' }}
+                                    />
+                                    <button 
+                                        className='flex items-center gap-1 text-blue-500 text-xs font-medium disabled:opacity-50'
+                                        onClick={() => avatarInputRef.current?.click()}
+                                        disabled={isUploading}
+                                    >
+                                        {isUploading ? (
+                                            <>
+                                                <Loader2 className='w-4 h-4 animate-spin' /> Uploading...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Pencil className='w-4 h-4' /> Change Photo
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                                 <p>

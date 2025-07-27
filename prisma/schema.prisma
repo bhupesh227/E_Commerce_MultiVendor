@@ -11,9 +11,7 @@ model images {
   id        String    @id @default(auto()) @map("_id") @db.ObjectId
   file_id   String
   url       String? 
-  userId    String?   @db.ObjectId
   shopId    String?   @db.ObjectId 
-  users     users?    @relation(fields:[userId],references:[id])
   shops     shops?    @relation(fields: [shopId], references: [id])
   products  products? @relation(fields: [productId], references: [id])
   productId String?   @db.ObjectId
@@ -26,7 +24,7 @@ model users{
   role          String        @default("user")
   password      String?
   following     String[]
-  avatar        images[]
+  avatar        Json?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   shopReviews   shopReviews[]

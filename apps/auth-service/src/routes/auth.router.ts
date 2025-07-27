@@ -1,10 +1,11 @@
 import express, { Router } from "express";
-import { addUserAddress, createShop, createStripeLink, deleteUserAddress, getAdmin, getLayoutData, getSeller, getUser, getUserAddresses, handleRefreshToken, loginAdmin, loginUser,  logoutAdmin,  logOutSeller,  logOutUser, registerSeller, sellerLogin, updateUserPassword, userForgotPassword, userRegistration, userResetPassword, verifySeller, verifyUser, verifyUserForgotPassword } from "../controllers/auth.controller";
+import { addUserAddress, createShop, createStripeLink, deleteUserAddress, getAdmin, getLayoutData, getSeller, getUser, getUserAddresses, handleRefreshToken, loginAdmin, loginUser,  logoutAdmin,  logOutSeller,  logOutUser, registerSeller, sellerLogin, updateUserAvatar, updateUserPassword, userForgotPassword, userRegistration, userResetPassword, verifySeller, verifyUser, verifyUserForgotPassword } from "../controllers/auth.controller";
 import isAuthenticated from "@packages/middleware/isAuthenticated";
 import { isAdmin, isSeller } from "@packages/middleware/AuthorizeRole";
-
+import multer from 'multer';
 
 const router:Router = express.Router();
+const upload = multer();
 
 router.post("/user-registration",userRegistration);
 router.post("/verify-user",verifyUser);
@@ -35,6 +36,7 @@ router.get("/logged-in-admin", isAuthenticated,isAdmin,getAdmin);
 router.get("/logout-admin", isAuthenticated, logoutAdmin);
 
 router.get('/get-layouts', getLayoutData);
+router.post('/update-avatar', isAuthenticated, upload.single('avatar'), updateUserAvatar);
 
 
 

@@ -41,12 +41,22 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-8">
-          {/* User Icon */}
+
           {!isLoading && user ? (
             <Link href="/profile" className="flex items-center gap-2">
-              <div className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]">
-                <User />
-              </div>
+              {(user.avatar as any)?.url ? (
+                <Image
+                  src={(user.avatar as any).url}
+                  alt="User Avatar"
+                  width={50}
+                  height={50}
+                  className="w-[50px] h-[50px] rounded-full object-cover border-2 border-gray-200"
+                />
+              ) : (
+                <div className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]">
+                  <User />
+                </div>
+              )}
               <div>
                 <span className="block font-medium">Hello,</span>
                 <span className="font-semibold capitalize">{user.name.split(' ')[0]}</span>
@@ -67,7 +77,6 @@ const Header = () => {
           )}
 
          
-          {/* Wishlist Icon */}
           <div className="flex items-center gap-5">
             <Link href="/wishlist" className="relative">
               <Heart />
@@ -79,7 +88,6 @@ const Header = () => {
             </Link>
           </div>
           
-          {/* Cart Icon */}
           <div className="flex items-center gap-5">
             <Link href="/cart" className="relative">
               <ShoppingCart />
