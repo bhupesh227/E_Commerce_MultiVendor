@@ -27,7 +27,7 @@ const Sidebar = () => {
 
   return (
     <Box
-      $css={{
+      css={{
         height: '100vh',
         zIndex: 202,
         position: 'sticky',
