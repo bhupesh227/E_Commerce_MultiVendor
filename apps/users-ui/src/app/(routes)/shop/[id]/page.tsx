@@ -21,7 +21,7 @@ export async function generateMetadata({ params}: {params: Promise<{ id: string}
             description: data?.shop?.bio || "Discover the unique products offered by this shop.",
             images: [
                 {
-                    url: data?.shop?.avatar?.[0] || "/coverimage.jpg",
+                    url: data?.shop?.avatar?.url  || "/coverimage.jpg",
                     width: 800,
                     height: 600,
                     alt: data?.shop?.name || "Shop Cover Image",
@@ -35,7 +35,7 @@ export async function generateMetadata({ params}: {params: Promise<{ id: string}
             description: data?.shop?.bio || "Explore the features and benefits of this product.",
             images: [
                 {
-                    url: data?.shop?.avatar?.[0] || "/coverimage.jpg",
+                    url: data?.shop?.avatar?.url  || "/coverimage.jpg",
                     width: 800,
                     height: 600,
                     alt: data?.shop?.name || "Shop Cover Image",
@@ -51,7 +51,7 @@ const ShopContentPage = async ({ params}: {params: Promise<{ id: string}>}) => {
     const data = await fetchSellerDetails(id);
   return (
     <div>
-        <SellerProfile shop={data?.shop} followerCount={data?.followerCount} />
+        <SellerProfile shop={data?.shop} followerCount={data?.followersCount} />
     </div>
   )
 }

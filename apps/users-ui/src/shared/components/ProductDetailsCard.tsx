@@ -111,7 +111,7 @@ const ProductDetailsCard = ({  setOpen, data }: Props) => {
                     <div className="border-b relative pb-3 border-gray-200 flex items-center justify-between">
                         <div className="flex items-start gap-3">
                             <Image
-                                src={data?.shop?.avatar || '/images/shop-logo.png'}
+                                src={data?.shop?.avatar?.url || '/images/shop-logo.png'}
                                 alt="Shop Logo"
                                 width={60}
                                 height={60}

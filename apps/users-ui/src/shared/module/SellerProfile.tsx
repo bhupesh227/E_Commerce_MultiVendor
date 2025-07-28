@@ -11,6 +11,7 @@ import { Calendar, Clock, Globe, Heart, MapPin, Star, Users } from 'lucide-react
 import Link from 'next/link';
 import { FaTwitter, FaYoutube } from 'react-icons/fa';
 import ProductCard from '../components/ProductCard';
+import { useRouter } from 'next/navigation';
 
 const TABS = ['Products', 'Offers', 'Reviews'];
 
@@ -18,11 +19,14 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
   const [activeTab, setActiveTab] = useState('Products');
   const [isFollowing, setIsFollowing] = useState(false);
   const [followers , setFollowers] = useState(followerCount);
+  const [joinedDate, setJoinedDate] = useState('');
 
   const {user} = useUser();
   const location = useLocationTracking();
   const deviceInfo = useDeviceTracking();
   const queryClient = useQueryClient();
+  const router = useRouter();
+
   const {data:products , isLoading} = useQuery({
     queryKey: ['seller-products'],
     queryFn: async ()=>{
@@ -72,6 +76,7 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
       queryClient.invalidateQueries({
         queryKey: ['is-following', shop?.id]
       });
+      router.refresh();
     },
     onError: (error) => {
       console.error('Error toggling follow status:', error);
@@ -92,11 +97,17 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
     }
   },[isLoading, location, deviceInfo]);
 
+  useEffect(() => {
+    if (shop?.createdAt) {
+      setJoinedDate(new Date(shop.createdAt).toLocaleDateString());
+    }
+  }, [shop?.createdAt]);
+
   return (
     <div>
       <div className='relative w-full flex justify-center'>
         <Image
-          src={shop?.coverBanner || "/default-banner.jpg"}
+          src={(shop?.coverBanner as any)?.url || '/default-cover.jpg'}
           alt="Shop Banner"
           width={1200}
           height={400}
@@ -108,7 +119,7 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
           <div className='flex flex-col md:flex-row items-center md:items-start gap-4'>
             <div className='relative w-[100px] h-[100px] rounded-full border-4 border-slate-300 overflow-hidden'>
               <Image
-                src={shop?.avatar || "/default-profile.jpg"}
+                src={(shop?.avatar as any)?.url || '/default-avatar.jpg'}
                 alt="Seller Avatar"
                 layout='fill'
                 objectFit='cover'
@@ -124,7 +135,7 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
                 </div>
                 <div className='flex items-center gap-1 text-gray-600 cursor-pointer'>
                   <Users size={16} className='text-gray-600'/>{" "}
-                  <span>{followers} Followers</span>
+                  <span>{followers || 0} Followers</span>
                 </div>
               </div>
               <div className='flex items-center gap-4 mt-4 text-slate-700'>
@@ -150,9 +161,7 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
           <h2 className='text-lg font-semibold text-slate-900'>Shop Details</h2>
           <div className='mt-4 flex items-center gap-4 text-slate-700'>
             <Calendar size={16} />
-            <span>
-              Joined At : {new Date(shop?.createdAt).toLocaleDateString()}
-            </span>
+             {joinedDate && <span>Joined At : {joinedDate}</span>}
           </div>
           {shop?.website && (
             <div className='mt-4 flex items-center gap-4 text-slate-700'>
@@ -198,7 +207,7 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
         </div>
         <div className='bg-gray-200 rounded-lg my-4 text-slate-700'>
           {activeTab === 'Products' && (
-            <div className='m-auto grid grid-cols-1 p-4 sm:grid-cols-3 md:grid-cols-4'>
+            <div className='m-auto grid grid-cols-1 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
               {isLoading && (
                 <>
                   {Array.from({ length: 10 }).map((_, index) => (
@@ -215,7 +224,7 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
             </div>
           )}
           {activeTab === 'Offers' && (
-            <div className='m-auto grid grid-cols-1 p-4 sm:grid-cols-3 md:grid-cols-4'>
+            <div className='m-auto grid grid-cols-1 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
               {isEventsLoading && (
                 <>
                   {Array.from({ length: 10 }).map((_, index) => (

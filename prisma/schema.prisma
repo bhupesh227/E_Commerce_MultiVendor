@@ -11,8 +11,6 @@ model images {
   id        String    @id @default(auto()) @map("_id") @db.ObjectId
   file_id   String
   url       String? 
-  shopId    String?   @db.ObjectId 
-  shops     shops?    @relation(fields: [shopId], references: [id])
   products  products? @relation(fields: [productId], references: [id])
   productId String?   @db.ObjectId
 }
@@ -55,8 +53,8 @@ model shops {
   name          String
   bio           String?
   category      String
-  avatar        images[]
-  coverBanner   String?
+  avatar        Json?
+  coverBanner   Json?
   address       String
   opening_hours String?
   website       String?

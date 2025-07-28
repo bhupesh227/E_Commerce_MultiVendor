@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import imageKit from "@packages/libs/imagekit";
 import prisma from "@packages/libs/prisma";
 import { AuthError, NotFoundError, ValidationError,ForbiddenError } from "@packages/error-handler";
+import { v4 as uuidv4 } from 'uuid';
 
 
 export const deleteShop =async (req: any, res: Response, next: NextFunction) => {
@@ -79,60 +80,6 @@ export const restoreShop =async (req: any, res: Response, next: NextFunction) =>
 
 }
 
-export const UploadImage =async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const {fileName, file , folder} = req.body;
-        if (!fileName || !file || !folder) {
-            return res.status(400).json({
-                message: "fileName, file and folder are required"
-            });
-        }
-        const uploadResponse = await imageKit.upload({
-            file: file, // base64 string
-            fileName: fileName,
-            folder: folder
-        });
-        return res.status(200).json({
-            message: "Image uploaded successfully",
-            file_id: uploadResponse.fileId,
-            url: uploadResponse.url,
-            success: true
-        });
-    } catch (error) {
-        console.error("Error uploading image:", error);
-        return next(error);
-    }
-}
-
-export const updateProfilePictures =async (req: any, res: Response, next: NextFunction) => {
-    try {
-        const {editType, imageUrl} = req.body;
-        if(!editType || !imageUrl) {
-            return next(new ValidationError("editType and imageUrl are required"));
-        }
-        const sellerId = req.seller?.id;
-        if(!sellerId) {
-            return next(new AuthError("Unauthorized access"));
-        }
-        const updateField = editType === "cover" ? {coverBanner: imageUrl} : {avatar: imageUrl};
-        const updatedSeller = await prisma.shops.update({
-            where: { id: sellerId },
-            data: updateField,
-            select :{
-                id: true,
-                avatar: true,
-                coverBanner: true
-            }
-        });
-        res.status(200).json({
-            success: true,
-            message : `${editType === "cover" ? "Cover banner" : "Avatar"} updated successfully`,
-            updatedSeller
-        });
-    } catch (error) {
-        return next(error);
-    }
-};
 
 export const editSellerProfile =async (req: any, res: Response, next: NextFunction) => {
     try {
@@ -397,3 +344,60 @@ export const markNotificationAsRead =async (req: any, res: Response, next: NextF
         return next(error);
     }
 }
+
+const updateShopImage = async (req: any, res: Response, next: NextFunction, imageType: 'avatar' | 'coverBanner') => {
+    try {
+        const shopId = req.seller?.shop?.id;
+        const file = req.file;
+
+        if (!shopId) return next(new NotFoundError('Shop not found for this seller.'));
+        if (!file) return next(new ValidationError('No file was uploaded.'));
+
+        const shop = await prisma.shops.findUnique({
+            where: { id: shopId },
+            select: { [imageType]: true },
+        });
+
+        const oldImage = shop?.[imageType] as unknown as { fileId: string; url: string } | null;
+        if (oldImage?.fileId) {
+            try {
+                await imageKit.deleteFile(oldImage.fileId);
+            } catch (deleteError) {
+                console.warn(`Could not delete old ${imageType} from ImageKit:`, deleteError);
+            }
+        }
+
+        const uniqueFileName = `${uuidv4()}_${file.originalname}`;
+        const response = await imageKit.upload({
+            file: file.buffer,
+            fileName: uniqueFileName,
+            folder: `/shops/${imageType}s`,
+        });
+
+        const updatedShop = await prisma.shops.update({
+            where: { id: shopId },
+            data: {
+                [imageType]: {
+                    url: response.url,
+                    fileId: response.fileId,
+                },
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `${imageType === 'avatar' ? 'Avatar' : 'Cover banner'} updated successfully.`,
+            shop: updatedShop,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateShopAvatar = (req: any, res: Response, next: NextFunction) => {
+    return updateShopImage(req, res, next, 'avatar');
+};
+
+export const updateShopCover = (req: any, res: Response, next: NextFunction) => {
+    return updateShopImage(req, res, next, 'coverBanner');
+};

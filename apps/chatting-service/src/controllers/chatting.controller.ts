@@ -87,11 +87,7 @@ export const getUserConversations = async (req:any, res:Response,next:NextFuncti
                             id: sellerParticipant.sellerId
                         },
                         include:{
-                            shop: {
-                                include: {
-                                    avatar: true
-                                }
-                            }
+                            shop: true
                         }
                     });
                 }
@@ -168,9 +164,6 @@ export const getSellerConversation = async (req:any, res:Response,next:NextFunct
                         where: {
                             id: userParticipant.userId
                         },
-                        include:{
-                            avatar: true
-                        }
                     });
                 }
 
@@ -259,11 +252,7 @@ export const fetchMessages = async (req:any, res:Response,next:NextFunction) => 
                     id: sellerParticipant.sellerId
                 },
                 include: {
-                    shop: {
-                        include: {
-                            avatar: true
-                        }
-                    }
+                    shop: true
                 }
             });
 
@@ -343,9 +332,6 @@ export const fetchSellerMessages = async (req:any, res:Response,next:NextFunctio
                 where: {
                     id: userParticipant.userId
                 },
-                include: {
-                    avatar: true
-                }
             });
 
             const redisKey = `online:user:user_${userParticipant.userId}`;
