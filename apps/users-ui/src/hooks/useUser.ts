@@ -2,19 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '../utils/axiosInstance';
 import { useAuthStore } from '../store/useAuthStore';
 import { useEffect } from 'react';
-import { isProtected } from '../utils/isProtected';
-
 
 
 
 const fetchUser = async () => {
-  const response = await axiosInstance.get(`/api/logged-in-user`,  isProtected);
+  const response = await axiosInstance.get(`/api/logged-in-user`);
   return response.data.user;
  
 };
 
 const useUser = () => {
-  const { setLoggedIn } = useAuthStore();
+  const { setLoggedIn , isLoggedIn } = useAuthStore();
 
   const {
     data: user,
@@ -25,6 +23,7 @@ const useUser = () => {
     queryKey: ['user'],
     queryFn: fetchUser,
     staleTime: 1000 * 60 * 5,
+    enabled: isLoggedIn,
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 401) return false;
       return failureCount < 1;

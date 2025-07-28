@@ -15,7 +15,7 @@ import React, { Suspense, useEffect, useRef, useState } from 'react';
 
 const InboxPageContent = () => {
     const searchParams = useSearchParams();
-    const {user, } = useUserRequiredAuth();
+    const {user} = useUserRequiredAuth();
     const router = useRouter();
     const messageConatinerRef = useRef<HTMLDivElement | null>(null);
     const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
@@ -29,7 +29,7 @@ const InboxPageContent = () => {
     const [page, setPage] = useState(1);
 
     const conversationId = searchParams.get("conversationId");
-    const {ws ,} = useWebSocket();
+    const {ws} = useWebSocket();
 
     const {data: conversations, isLoading} = useQuery({
         queryKey: ['conversations'],
@@ -177,6 +177,8 @@ const InboxPageContent = () => {
       setMessage("");
       scrollToBottom();
     };
+    console.log("Selected Chat: ", selectedChat);
+    console.log("chat: ", chats);
     
 
     return(
@@ -207,7 +209,7 @@ const InboxPageContent = () => {
                         >
                           <div className='flex items-center gap-2'>
                             <Image
-                              src={chat.seller?.avatar?.[0] || '/defaultprofile.jpg'}
+                              src={chat.seller?.avatar?.url || '/defaultprofile.jpg'}
                               alt={chat.seller?.name || 'Seller Avatar'}
                               width={40}
                               height={40}
@@ -248,7 +250,7 @@ const InboxPageContent = () => {
                 <>
                   <div className='p-4 border-b border-b-gray-200 bg-white flex items-center gap-4'>
                     <Image
-                      src={selectedChat.seller?.avatar?.[0]?.url || '/defaultprofile.jpg'}
+                      src={selectedChat.seller?.avatar?.url || '/defaultprofile.jpg'}
                       alt={selectedChat.seller?.name || 'Seller Avatar'}
                       width={40}
                       height={40}

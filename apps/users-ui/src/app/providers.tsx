@@ -30,18 +30,19 @@ const Providers = ({ children }: Props) => {
 
 
 const ProviderWithWebSocket = ({children}:{ children: ReactNode }) => {
-  const  {user } = useUser();
+  const { user, isLoading } = useUser();
+  if (isLoading) {
+    return null; 
+  }
 
-  return (
-    <>
-      {user ? (
-        <WebSocketProvider user={user}>
-          {children}
-        </WebSocketProvider>
-      ) : (
-        children
-      )}
-    </>
-  )
+  if (user) {
+    return (
+      <WebSocketProvider user={user}>
+        {children}
+      </WebSocketProvider>
+    );
+  }
+
+  return <>{children}</>;
 }
 export default Providers;

@@ -179,7 +179,7 @@ const ChatPage= ( )=> {
                                     >
                                         <div className='flex items-center gap-3'>
                                             <Image
-                                                src={chat.user?.avatar[0] || 'https://ik.imagekit.io/bhupesh227/ecomm/product/product-1752305092836_YimfOVAdR.jpg'}
+                                                src={chat.user?.avatar?.url || 'https://ik.imagekit.io/bhupesh227/ecomm/product/product-1752305092836_YimfOVAdR.jpg'}
                                                 alt={chat.user?.name}
                                                 width={40}
                                                 height={40}
@@ -217,7 +217,7 @@ const ChatPage= ( )=> {
                         <>
                             <div className='p-4 border-b border-gray-800 flex items-center gap-3'>
                                 <Image
-                                    src={selectedChat.user?.avatar[0] || 'https://ik.imagekit.io/bhupesh227/ecomm/product/product-1752305092836_YimfOVAdR.jpg'}
+                                    src={selectedChat.user?.avatar?.url || 'https://ik.imagekit.io/bhupesh227/ecomm/product/product-1752305092836_YimfOVAdR.jpg'}
                                     alt={selectedChat.user?.name}
                                     width={40}
                                     height={40}

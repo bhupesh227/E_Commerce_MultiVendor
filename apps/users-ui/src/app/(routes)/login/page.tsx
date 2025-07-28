@@ -8,6 +8,7 @@ import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import Link from 'next/link';
 import GoogleButton from 'apps/users-ui/src/shared/components/GoogleButton';
 import axiosInstance from 'apps/users-ui/src/utils/axiosInstance';
+import { useAuthStore } from 'apps/users-ui/src/store/useAuthStore';
 
 
 
@@ -23,6 +24,7 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { setLoggedIn } = useAuthStore();
 
   const {
     register,
@@ -32,26 +34,27 @@ const LoginPage = () => {
 
   const loginMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const response = await axiosInstance.post('/api/login-user', data, {
-        withCredentials: true,
-      });
-      return response.data;
+        const response = await axiosInstance.post('/api/login-user', data, {
+            withCredentials: true,
+        });
+        return response.data;
     },
     onSuccess: async() => {
-      setServerError(null);
-      await queryClient.invalidateQueries({ queryKey: ['user'] });
-      router.push('/');
+        setLoggedIn(true);
+        setServerError(null);
+        await queryClient.invalidateQueries({ queryKey: ['user'] });
+        router.push('/');
     },
     onError: (error: AxiosError) => {
-      const errorMessage =
-        (error.response?.data as { message?: string })?.message ||
-        'Invalid credentials';
-      setServerError(errorMessage);
+        const errorMessage =
+            (error.response?.data as { message?: string })?.message ||
+            'Invalid credentials';
+        setServerError(errorMessage);
     },
   });
 
   const onSubmit = async (data: FormData) => {
-    loginMutation.mutate(data);
+        loginMutation.mutate(data);
   };
 
   return (
