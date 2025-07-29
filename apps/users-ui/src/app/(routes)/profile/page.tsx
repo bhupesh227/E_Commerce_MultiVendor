@@ -8,6 +8,7 @@ import OrdersTable from 'apps/users-ui/src/shared/components/OrdersTable';
 import QuickActionCard from 'apps/users-ui/src/shared/components/QuickActionCard';
 import ShippingAddressSection from 'apps/users-ui/src/shared/components/ShippingAddressSection';
 import StatCard from 'apps/users-ui/src/shared/components/StatCard';
+//import { useStore } from 'apps/users-ui/src/store';
 import { useAuthStore } from 'apps/users-ui/src/store/useAuthStore';
 import axiosInstance from 'apps/users-ui/src/utils/axiosInstance';
 import { BadgeCheck, Bell, CheckCircle, Clock, Gift, Inbox, Loader2, Lock, LogOut, MapPin, Pencil, PhoneCall, Receipt, Settings, ShoppingBag, Truck, User } from 'lucide-react'
@@ -44,9 +45,10 @@ const ProfilePageContent = () => {
         try {
             await axiosInstance.get("/api/logout-user");
             setLoggedIn(false);
-            queryClient.removeQueries({ queryKey: ['user'] });
-            router.push("/login");
+            queryClient.clear();
+            //useStore.persist.clearStorage();
             toast.success("Logged out Successfully");
+            window.location.href = "/login";
         } catch (error) {
             toast.error("Failed to log out");
         }
