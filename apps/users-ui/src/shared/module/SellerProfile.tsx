@@ -193,8 +193,8 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
           )}
         </div>
       </div>
-      <div className='w-[85%] lg:w-[70%] mx-auto mt-6'>
-        <div className='flex border-b border-gray-300 pb-2 mb-4'>
+      <div className='w-[85%] lg:w-[70%] mx-auto mt-6 mb-10'>
+        <div className='flex border-b border-gray-700 '>
           {TABS.map((tab) => (
             <button
               key={tab}
@@ -205,9 +205,9 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
             </button>
           ))}
         </div>
-        <div className='bg-gray-200 rounded-lg my-4 text-slate-700'>
+        <div className='mt-6 bg-slate-400 rounded-lg min-h-[200px] flex justify-center items-center'>
           {activeTab === 'Products' && (
-            <div className='m-auto grid grid-cols-1 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+            <div className='grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 md:gap-6 md:p-4'>
               {isLoading && (
                 <>
                   {Array.from({ length: 10 }).map((_, index) => (
@@ -224,7 +224,7 @@ const SellerProfile = ({ shop, followerCount }:{ shop: any, followerCount: numbe
             </div>
           )}
           {activeTab === 'Offers' && (
-            <div className='m-auto grid grid-cols-1 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+            <div className='grid grid-cols-1 p-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 md:gap-6 md:p-4'>
               {isEventsLoading && (
                 <>
                   {Array.from({ length: 10 }).map((_, index) => (
