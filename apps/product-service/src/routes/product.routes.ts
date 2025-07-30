@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { createDiscountCode, createProduct, deleteDiscountCodes, deleteProduct, deleteProductImage, getAllEvents, getAllProducts, getCategories, getDiscountCodes, getFilteredEvents, getFilteredProducts, getFilteredShops, getProductDetails, getShopProduct, restoreProduct, searchProducts, topShops, uploadProductImage } from '../controllers/product.controller';
+import { createDiscountCode, createEvent, createProduct, deleteDiscountCodes, deleteProduct, deleteProductImage, getAllEvents, getAllProducts, getCategories, getDiscountCodes, getFilteredEvents, getFilteredProducts, getFilteredShops, getProductDetails, getShopProduct, restoreProduct, searchProducts, topShops, uploadEventImage, uploadProductImage } from '../controllers/product.controller';
 import isAuthenticated from '@packages/middleware/isAuthenticated';
 import { isSeller } from '@packages/middleware/AuthorizeRole';
 
@@ -14,9 +14,11 @@ router.get('/get-discount-codes', isAuthenticated, getDiscountCodes);
 router.delete('/delete-discount-code/:id',  isAuthenticated,  isSeller,  deleteDiscountCodes);
 
 router.post("/upload-product-image",isAuthenticated,isSeller,uploadProductImage);
+router.post("/upload-event-image", isAuthenticated, isSeller, uploadEventImage);
 router.delete("/delete-product-image", isAuthenticated, isSeller, deleteProductImage);
 
 router.post('/create-product', isAuthenticated, isSeller, createProduct);
+router.post('/create-event', isAuthenticated, isSeller, createEvent);
 router.get('/get-shop-products', isAuthenticated, getShopProduct);
 
 router.delete('/delete-product/:productId', isAuthenticated, isSeller, deleteProduct);

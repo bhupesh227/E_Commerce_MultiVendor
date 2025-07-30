@@ -4,7 +4,7 @@ import prisma from "@packages/libs/prisma";
 import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 
-
+const now = new Date();
 
 export const getCategories = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -52,7 +52,7 @@ export const createDiscountCode = async (req: any, res: Response, next: NextFunc
     } catch (error) {
         next(error);
     }
-}
+};
 
 export const getDiscountCodes = async (req: any, res: Response, next: NextFunction) => {
     try {
@@ -66,7 +66,7 @@ export const getDiscountCodes = async (req: any, res: Response, next: NextFuncti
     } catch (error) {
         next(error);
     }
-}
+};
 
 export const deleteDiscountCodes = async (req: any, res: Response, next: NextFunction) => {
     try {
@@ -98,8 +98,7 @@ export const deleteDiscountCodes = async (req: any, res: Response, next: NextFun
     } catch (error) {
         next(error);
     }
-}
-
+};
 
 export const uploadProductImage = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -124,7 +123,32 @@ export const uploadProductImage = async (req: Request, res: Response, next: Next
     } catch (error) {
         next(error);
     }
-}
+};
+
+export const uploadEventImage = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { fileName } = req.body;
+
+        if (!fileName) {
+            throw new ValidationError("File required.");
+        }
+
+        const response = await imageKit.upload({
+            file: fileName,
+            fileName: `event-${Date.now()}.jpg`, 
+            folder: "/ecomm/event",             
+        });
+
+        res.status(201).json({
+            fileId: response.fileId,
+            fileUrl: response.url,
+            message: "Image uploaded successfully",
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 
 export const deleteProductImage = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -144,12 +168,10 @@ export const deleteProductImage = async (req: Request, res: Response, next: Next
     } catch (error) {
         next(error);
     }
-}
-
+};
 
 export const createProduct = async (req: any, res: Response, next: NextFunction) => {
     try {
-        
         const {
             title,
             shortDescription,
@@ -235,8 +257,7 @@ export const createProduct = async (req: any, res: Response, next: NextFunction)
         next(error);
         
     }
-}
-
+};
 
 export const getShopProduct = async (req: any, res: Response, next: NextFunction) => {
     try {
@@ -264,8 +285,7 @@ export const getShopProduct = async (req: any, res: Response, next: NextFunction
     } catch (error) {
         next(error);
     }
-}
-
+};
 
 export const deleteProduct = async (req: any, res: Response, next: NextFunction) => {
     try {
@@ -306,7 +326,7 @@ export const deleteProduct = async (req: any, res: Response, next: NextFunction)
     } catch (error) {
         return next(error);
     }
-}
+};
 
 export const restoreProduct = async (req: any, res: Response, next: NextFunction) => {
     try {
@@ -347,8 +367,7 @@ export const restoreProduct = async (req: any, res: Response, next: NextFunction
     } catch (error) {
         next(error);
     }
-}
-
+};
 
 export const getAllProducts = async (
   req: Request,
@@ -410,14 +429,14 @@ export const getAllEvents = async (req: Request, res: Response, next: NextFuncti
 
         const type = req.query.type;
 
-        const baseFilter = { AND: [{ startingDate: { not: null } }, { endingDate: { not: null } }] }
+        const baseFilter = { AND: [{ startingDate: { not: null ,lte: now } }, { endingDate: { not: null ,gte: now } }] }
 
         const orderBy: Prisma.productsOrderByWithRelationInput =
             type === 'latest'
                 ? { createdAt: "desc" as Prisma.SortOrder }
                 : { totalSales: "desc" as Prisma.SortOrder };
 
-        const [products, total, top10Products] = await Promise.all([
+        const [events, total, top10Products] = await Promise.all([
             prisma.products.findMany({
                 skip,
                 take: limit,
@@ -439,7 +458,7 @@ export const getAllEvents = async (req: Request, res: Response, next: NextFuncti
         ]);
 
         res.status(200).json({
-            products,
+            events,
             top10By: type === 'latest' ? 'latest' : 'topSales',
             top10Products,
             total,
@@ -450,7 +469,7 @@ export const getAllEvents = async (req: Request, res: Response, next: NextFuncti
     } catch (error) {
         return next(error);
     }
-}
+};
 
 export const getProductDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -470,8 +489,7 @@ export const getProductDetails = async (req: Request, res: Response, next: NextF
     } catch (error) {
         return next(error);
     }
-}
-
+};
 
 export const getFilteredProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -547,9 +565,8 @@ export const getFilteredProducts = async (req: Request, res: Response, next: Nex
     } catch (error) {
         next(error);
     }
-}
+};
 
-// for offers
 export const getFilteredEvents = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {
@@ -626,7 +643,7 @@ export const getFilteredEvents = async (req: Request, res: Response, next: NextF
     } catch (error) {
         next(error);
     }
-}
+};
 
 export const getFilteredShops = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -685,8 +702,7 @@ export const getFilteredShops = async (req: Request, res: Response, next: NextFu
     } catch (error) {
         next(error);
     }
-}
-
+};
 
 export const searchProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -729,7 +745,7 @@ export const searchProducts = async (req: Request, res: Response, next: NextFunc
     } catch (error) {
         return next(error);
     }
-}
+};
 
 export const topShops = async (req: Request, res: Response, next: NextFunction) => {4
     try {
@@ -782,4 +798,101 @@ export const topShops = async (req: Request, res: Response, next: NextFunction) 
         console.error("Error fetchong top shops:", error);
         return next(error);
     }
-}
+};
+
+export const createEvent = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const {
+            title,
+            shortDescription,
+            detailedDescription,
+            warranty,
+            customSpecifications,
+            customProperties,
+            slug,
+            tags,
+            cashOnDelivery,
+            brand,
+            videoUrl,
+            category,
+            subCategory,
+            regularPrice,
+            salePrice,
+            stock,
+            discountCodes,
+            images,
+            colors,
+            sizes,
+            startingDate,
+            endingDate,   
+        } = req.body;
+
+        if (!title || !shortDescription || !slug || !salePrice || !cashOnDelivery || !regularPrice || !stock || !category || !subCategory || !images || !startingDate || !endingDate) {
+            return next(new ValidationError("Missing some required fields!"));
+        }
+        
+        if (new Date(startingDate) >= new Date(endingDate)) {
+            return next(new ValidationError("End date must be after the start date."));
+        }
+
+        if (new Date(startingDate) < new Date()) {
+            return next(new ValidationError("Start date cannot be in the past."));
+        }
+
+        if (!req.seller.id) {
+            return next(new AuthError("Only sellers can create events!"));
+        }
+
+        const slugChecking = await prisma.products.findUnique({ where: { slug } });
+
+        if (slugChecking) {
+            return next(new ValidationError(`Slug already exists! Please use a different slug`));
+        }
+
+        const newEvent = await prisma.products.create({
+            data: {
+                title,
+                shortDescription,
+                detailedDescription,
+                warranty,
+                customSpecifications: customSpecifications || {},
+                customProperties: customProperties || {},
+                slug,
+                tags: Array.isArray(tags) ? tags : tags.split(','),
+                cashOnDelivery,
+                brand,
+                videoUrl,
+                category,
+                subCategory,
+                regularPrice: parseFloat(regularPrice),
+                salePrice: parseFloat(salePrice),
+                stock: parseInt(stock),
+                discountCodes: discountCodes.map((code: string) => code),
+                images: {
+                    create: images
+                        .filter((image: any) => image && image.fileId && image.fileUrl)
+                        .map((image: any) => ({
+                            file_id: image.fileId,
+                            url: image.fileUrl,
+                        })),
+                },
+                colors: colors || [],
+                sizes: sizes || [],
+                shopId: req.seller.shop.id,
+                startingDate: new Date(startingDate),
+                endingDate: new Date(endingDate),    
+            },
+            include: {
+                images: true,
+            },
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Event created successfully",
+            event: newEvent,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
