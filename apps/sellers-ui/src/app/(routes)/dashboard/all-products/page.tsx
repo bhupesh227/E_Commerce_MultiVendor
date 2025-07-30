@@ -189,7 +189,7 @@ const AllProducts = () => {
 
 
   return (
-    <div className="w-full min-h-screen p-8">
+    <div className="w-full min-h-screen md:p-8 p-3 pt-8">
       <div className="flex justify-between items-center mb-1">
         <h2 className="text-2xl text-white font-semibold">All Products</h2>
         <Link

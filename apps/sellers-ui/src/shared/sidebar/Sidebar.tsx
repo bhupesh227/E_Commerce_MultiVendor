@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import Box from '../components/Box';
 import { SidebarStyle } from './Sidebar.styles';
 import Link from 'next/link';
-import {  BellPlus, BellRing, CalendarPlus, LayoutDashboard, List, LogOut, Mail, PackageSearch, PlusSquare, Settings, TicketPercent, Wallet } from 'lucide-react';
+import {  BellPlus, BellRing, CalendarPlus, Home, LayoutDashboard, List, LogOut, Mail, PackageSearch, PlusSquare, Settings, TicketPercent, Wallet } from 'lucide-react';
 import SidebarItem from './Sidebar.item';
 import SidebarMenu from './Sidebar.Menu';
 // import Image from 'next/image';
@@ -31,7 +31,9 @@ const Sidebar = () => {
         height: '100vh',
         zIndex: 202,
         position: 'sticky',
-        padding: '8px',
+        paddingLeft: "8px",
+        marginTop: "8px",
+        paddingBottom: "30px",
         top: 0,
         overflowY: 'scroll',
         scrollbarWidth: 'none',
@@ -39,19 +41,17 @@ const Sidebar = () => {
       className="sidebar-wrapper"
     >
       <SidebarStyle.Header>
-        <Box>
+        <Box className='border-b border-[#4bb1f9] pb-1'>
           <Link href="/" className="flex justify-center text-center gap-2">
-            
-            
-            <Box>
-              <h3 className="text-xl font-medium text-[#ecedee]">
+            <Home className='mt-2 text-[#4bb1f9]' size={33} />
+            <Box css={{ width: '100%' }} className="flex flex-col items-start capitalize">
+              <h3 className="text-xl font-medium text-[#e5bb33]">
                 {seller?.shop?.name }
               </h3>
-              <h5 className="font-medium text-xs text-[#ecedeecf] whitespace-nowrap overflow-hidden text-ellipsis max-w-[170px] pl-2">
+              <h5 className="font-medium text-xs text-[#99a6b2cf] whitespace-nowrap overflow-hidden text-ellipsis max-w-[170px]">
                 {seller?.shop?.address}
               </h5>
             </Box>
-
           </Link>
         </Box>
       </SidebarStyle.Header>
@@ -66,9 +66,7 @@ const Sidebar = () => {
               isActive={activeSidebar === 'dashboard'}
               href="/dashboard"
             />
-
             <div className="mt-2 block">
-
                 <SidebarMenu title="Main Menu">
                   <SidebarItem
                     isActive={activeSidebar === '/dashboard/orders'}
@@ -78,7 +76,6 @@ const Sidebar = () => {
                       <List fill={getIconColor('/dashboard/orders')} size={22} />
                     }
                   />
-                
                   <SidebarItem
                     isActive={activeSidebar === '/dashboard/payments'}
                     title="Payments"
@@ -88,8 +85,6 @@ const Sidebar = () => {
                     }
                   />
                 </SidebarMenu>
-
-
                 <SidebarMenu title="Products">
                   <SidebarItem
                     isActive={activeSidebar === '/dashboard/create-product'}
@@ -99,7 +94,6 @@ const Sidebar = () => {
                       <PlusSquare fill={getIconColor('/dashboard/create-product')} size={22} />
                     }
                   />
-
                   <SidebarItem
                     isActive={activeSidebar === '/dashboard/all-products'}
                     title="All Products"
@@ -109,8 +103,6 @@ const Sidebar = () => {
                     }
                   />
                 </SidebarMenu>
-
-
                 <SidebarMenu title="Events">
                   <SidebarItem
                     isActive={activeSidebar === '/dashboard/create-event'}
@@ -120,7 +112,6 @@ const Sidebar = () => {
                       <CalendarPlus fill={getIconColor('/dashboard/create-event')} size={22} />
                     }
                   />
-
                   <SidebarItem
                     isActive={activeSidebar === '/dashboard/all-events'}
                     title="All Events"
@@ -130,8 +121,6 @@ const Sidebar = () => {
                     }
                   />
                 </SidebarMenu>
-
-
                 <SidebarMenu title="Controllers">
                   <SidebarItem
                     isActive={activeSidebar === '/dashboard/inbox'}
@@ -141,7 +130,6 @@ const Sidebar = () => {
                       <Mail fill={getIconColor('/dashboard/inbox')} size={22} />
                     }
                   />
-
                   <SidebarItem
                     isActive={activeSidebar === '/dashboard/settings'}
                     title="Settings"
@@ -150,7 +138,6 @@ const Sidebar = () => {
                       <Settings fill={getIconColor('/dashboard/settings')} size={22} />
                     }
                   />
-
                   <SidebarItem
                     isActive={activeSidebar === '/dashboard/notifications'}
                     title="Notifications"
@@ -160,8 +147,6 @@ const Sidebar = () => {
                     }
                   />
                 </SidebarMenu>
-
-
                 <SidebarMenu title="Extras">
                   <SidebarItem
                     isActive={activeSidebar === '/dashboard/discount-codes'}
@@ -171,7 +156,6 @@ const Sidebar = () => {
                       <TicketPercent fill={getIconColor('/dashboard/discount-codes')} size={26} />
                     }
                   />
-
                   <SidebarItem
                     isActive={activeSidebar === '/dashboard/logout'}
                     title="Logout"
@@ -180,8 +164,7 @@ const Sidebar = () => {
                       <LogOut fill={getIconColor('/dashboard/logout')} size={26} />
                     }
                   />
-                </SidebarMenu>
-                
+                </SidebarMenu>               
             </div>
           </SidebarStyle.Body>
       </div>
