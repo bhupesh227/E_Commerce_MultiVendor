@@ -6,6 +6,7 @@ import SectionTitle from '../shared/widgets/section/SectionTitle'
 import axiosInstance from '../utils/axiosInstance';
 import { useQuery } from '@tanstack/react-query';
 import ProductCard from '../shared/components/ProductCard';
+import ShopCard from '../shared/components/ShopCard';
 
 const page = () => {
 
@@ -30,6 +31,25 @@ const page = () => {
     },
     staleTime: 1000 * 60 * 2,
   });
+
+  const { data: offers, isLoading: offersLoading } = useQuery({
+    queryKey: ['offers'],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/product/api/get-all-events?page=1&limit=10");
+      return res.data.events || [];
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const { data: topShops, isLoading: topShopsLoading } = useQuery({
+    queryKey: ['top-shops'],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/product/api/top-shops");
+      return res.data.shops || [];
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+
   return (
     <div className='bg-[#f5f5f5]'>
       <Hero />
@@ -90,9 +110,39 @@ const page = () => {
             </p>
           )}
 
-          {/* <div className='my-8 block'>
-            <SectionTitle title='Top Shops' />
-          </div> */}
+          <div className='my-8 block'>
+            <SectionTitle title='Top Offers' />
+          </div> 
+          {!offersLoading && (
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4'>
+              {offers?.map((product: any) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+          {!offersLoading && offers?.length === 0 && (
+            <p className='text-center'>
+              No Offers Available yet
+            </p>
+          )}
+
+           <div className='my-8 block'>
+            <SectionTitle
+              title='Top Shops'
+            />
+          </div>
+          {!topShopsLoading && (
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4'>
+              {topShops?.map((shop: any) => (
+                <ShopCard key={shop.id} shop={shop} />
+              ))}
+            </div>
+          )}
+          {!topShopsLoading && topShops?.length === 0 && (
+            <p className='text-center'>
+              No Shops Available yet
+            </p>
+          )}
       </div>
     </div>
   )

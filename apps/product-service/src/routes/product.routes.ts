@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { createDiscountCode, createProduct, deleteDiscountCodes, deleteProduct, deleteProductImage, getAllProducts, getCategories, getDiscountCodes, getFilteredEvents, getFilteredProducts, getFilteredShops, getProductDetails, getShopProduct, restoreProduct, searchProducts, uploadProductImage } from '../controllers/product.controller';
+import { createDiscountCode, createProduct, deleteDiscountCodes, deleteProduct, deleteProductImage, getAllEvents, getAllProducts, getCategories, getDiscountCodes, getFilteredEvents, getFilteredProducts, getFilteredShops, getProductDetails, getShopProduct, restoreProduct, searchProducts, topShops, uploadProductImage } from '../controllers/product.controller';
 import isAuthenticated from '@packages/middleware/isAuthenticated';
 import { isSeller } from '@packages/middleware/AuthorizeRole';
 
@@ -30,6 +30,7 @@ router.get('/get-filtered-offers', getFilteredEvents);
 router.get('/get-filtered-shops', getFilteredShops);
 router.get('/search-products', searchProducts);
 
-
+router.get('/get-all-events', getAllEvents);
+router.get('/top-shops', topShops);
 
 export default router;

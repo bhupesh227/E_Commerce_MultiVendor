@@ -362,7 +362,7 @@ export const getAllProducts = async (
     const type = req.query.type ;
 
     const baseFilter = {
-      OR: [{ isDeleted: false }, { isDeleted: null }],
+      OR: [{ startingDate: null }, { endingDate: null }],
     };
 
     const orderBy: Prisma.productsOrderByWithRelationInput =
@@ -402,6 +402,55 @@ export const getAllProducts = async (
   }
 };
 
+export const getAllEvents = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 20;
+        const skip = (page - 1) * limit;
+
+        const type = req.query.type;
+
+        const baseFilter = { AND: [{ startingDate: { not: null } }, { endingDate: { not: null } }] }
+
+        const orderBy: Prisma.productsOrderByWithRelationInput =
+            type === 'latest'
+                ? { createdAt: "desc" as Prisma.SortOrder }
+                : { totalSales: "desc" as Prisma.SortOrder };
+
+        const [products, total, top10Products] = await Promise.all([
+            prisma.products.findMany({
+                skip,
+                take: limit,
+                include: {
+                    images: true,
+                    shop: true,
+                },
+                where: baseFilter,
+                orderBy: {
+                    totalSales: 'desc'
+                }
+            }),
+            prisma.products.count({ where: baseFilter }),
+            prisma.products.findMany({
+                take: 10,
+                where: baseFilter,
+                orderBy,
+            })
+        ]);
+
+        res.status(200).json({
+            products,
+            top10By: type === 'latest' ? 'latest' : 'topSales',
+            top10Products,
+            total,
+            currentPage: page,
+            totalPage: Math.ceil(total / limit),
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+}
 
 export const getProductDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -427,7 +476,7 @@ export const getProductDetails = async (req: Request, res: Response, next: NextF
 export const getFilteredProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {
-            priceRange = [0, 10000],
+            priceRange = [0, 100000],
             categories = [],
             colors = [],
             sizes = [],
@@ -449,7 +498,7 @@ export const getFilteredProducts = async (req: Request, res: Response, next: Nex
                 gte: parsedPriceRange[0],
                 lte: parsedPriceRange[1],
             },
-            isDeleted: false,
+            startingDate: null,
         };
 
         if (categories && (categories as string[]).length > 0) {
@@ -615,6 +664,7 @@ export const getFilteredShops = async (req: Request, res: Response, next: NextFu
                 include: {
                     sellers: true,
                     products: true,
+                    followers: true,
                     
                 }
             }),
@@ -677,6 +727,59 @@ export const searchProducts = async (req: Request, res: Response, next: NextFunc
         return res.status(200).json({ products });
 
     } catch (error) {
+        return next(error);
+    }
+}
+
+export const topShops = async (req: Request, res: Response, next: NextFunction) => {4
+    try {
+        const topShopsData = await prisma.orders.groupBy({
+            by: ['shopId'],
+            _sum: {
+                total: true,
+            },
+            orderBy: {
+                _sum: {
+                    total: "desc"
+                },
+            },
+            take: 10
+        });
+
+        const shopIds = topShopsData.map((item) => item.shopId);
+        const shops = await prisma.shops.findMany({
+            where: {
+                id: {
+                    in: shopIds
+                }
+            },
+            select: {
+                id: true,
+                name: true,
+                avatar: true,
+                coverBanner: true,
+                address: true,
+                ratings: true,
+                followers: true,
+                category: true,
+            },
+        });
+
+        const enrichedShops = shops.map((shop) => {
+            const salesData = topShopsData.find((s) => s.shopId === shop.id);
+            return {
+                ...shops,
+                totalSales: salesData?._sum.total ?? 0,
+            }
+        });
+
+        const top10Shops = enrichedShops
+            .sort((a, b) => b.totalSales - a.totalSales)
+            .slice(0, 10);
+
+        return res.status(200).json({ shops: top10Shops });
+    } catch (error) {
+        console.error("Error fetchong top shops:", error);
         return next(error);
     }
 }

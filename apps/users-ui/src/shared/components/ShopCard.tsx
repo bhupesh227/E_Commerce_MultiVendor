@@ -8,8 +8,8 @@ interface ShopCardProps {
         id: string,
         name: string,
         description?: string,
-        avatar: string,
-        coverBanner?: string,
+        avatar: { url: string },
+        coverBanner?: { url: string },
         address?: string,
         followers?: [],
         ratings?: number,
@@ -18,21 +18,22 @@ interface ShopCardProps {
 }
 
 const ShopCard: React.FC<ShopCardProps> = ({ shop }) => {
+
   return (
     <div className='w-full rounded-md cursor-pointer bg-white border border-gray-200 shadow-sm overflow-hidden transition'>
         <div className='h-[120px] w-full relative'>
             <Image
-                src={shop?.coverBanner || "/coverimage.jpg"}
+                src={shop?.coverBanner?.url || "/coverimage.jpg"}
                 alt='Cover'
                 fill
                 className='object-cover w-full h-full'
             />
         </div>
 
-        <div className='relative flex justify-center -mt-8]'>
+        <div className='relative flex justify-center -mt-8'>
             <div className='w-16 h-16 rounded-full border-4 border-white overflow-hidden shadow bg-white'>
                 <Image
-                    src={shop.avatar || "/defaultprofile.jpg"}
+                    src={shop?.avatar?.url || "/defaultprofile.jpg"}
                     alt={shop.name}
                     width={64}
                     height={64}

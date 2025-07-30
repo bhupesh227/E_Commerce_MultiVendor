@@ -68,7 +68,7 @@ const ProductDetails = ({ productDetails }: { productDetails: any }) => {
             const res = await axiosInstance.get(
                 `/product/api/get-filtered-products?${query.toString()}`
             );
-            console.log("Filtered Products:", res.data.products);
+
             setRecommendedProducts(res.data.products);
 
         } catch (error) {
