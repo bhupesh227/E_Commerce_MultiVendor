@@ -262,26 +262,55 @@ export const createProduct = async (req: any, res: Response, next: NextFunction)
 export const getShopProduct = async (req: any, res: Response, next: NextFunction) => {
     try {
         const shopId = req.seller?.shop?.id;
-
         if(!shopId) {
             next(new ValidationError("Shop not found!"));
             return;
         }
-
         const products = await prisma.products.findMany({
             where : {
                 shopId: shopId,
+                startingDate: null,
+                endingDate: null,
             },
-            include : {
-                images : true,
+            include: {
+                images: true,
             }
         })
 
         res.status(201).json({
-            success : true,
+            success: true,
             products
         });
 
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getShopEvents = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const shopId = req.seller?.shop?.id;
+        if (!shopId) {
+            return next(new ValidationError("Shop not found!"));
+        }
+        const events = await prisma.products.findMany({
+            where: {
+                shopId: shopId,
+                startingDate: { not: null },
+                endingDate: { not: null },
+            },
+            include: {
+                images: true,
+            },
+            orderBy: {
+                startingDate: 'desc',
+            }
+        });
+
+        res.status(201).json({
+            success: true,
+            events,
+        });
     } catch (error) {
         next(error);
     }
@@ -369,11 +398,7 @@ export const restoreProduct = async (req: any, res: Response, next: NextFunction
     }
 };
 
-export const getAllProducts = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getAllProducts = async ( req: Request, res: Response, next: NextFunction ) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
