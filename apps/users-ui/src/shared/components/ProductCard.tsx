@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Ratings from './Ratings';
 import { Eye, Heart, ShoppingCartIcon } from 'lucide-react';
 import ProductDetailsCard from './ProductDetailsCard';
@@ -31,40 +31,44 @@ const ProductCard = ({ product, isEvent = false }: Props) => {
   const location = useLocationTracking();
   const deviceInfo = useDeviceTracking();
 
-  useEffect(() => {
-    if (isEvent && product?.endingDate) {
-      const interval = setInterval(() => {
-        const now = Date.now();
-        const eventDate = new Date(product.endingDate).getTime();
-        const difference = eventDate - now;
-
-        if (difference <= 0) {
-          setTimeLeft('Expired');
-          clearInterval(interval);
-          return;
-        }
-
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        );
-        const minutes = Math.floor(
-          (difference % (1000 * 60 * 60)) / (1000 * 60)
-        );
-
-        setTimeLeft(`${days}d ${hours}h ${minutes}m left with this price`);
-      }, 60000);
-      return () => clearInterval(interval);
+  const calculateTimeLeft = useCallback(() => {
+    const now = Date.now();
+    const eventDate = new Date(product.endingDate).getTime();
+    const difference = eventDate - now;
+    if (difference <= 0) {
+      return 'Expired';
     }
-    return;
-  }, [isEvent, product?.endingDate]);
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((difference % (1000 * 60)) / 1000); 
+    if (days > 0) {
+      return `${days} days ${hours} hrs left`;
+    }
+    return `${hours} hrs ${minutes} mins ${seconds} secs left`;
+  }, [product.endingDate]);
 
+  useEffect(() => {
+    if (!isEvent || !product?.endingDate) {
+      return;
+    }
+    setTimeLeft(calculateTimeLeft());
+    const interval = setInterval(() => {
+      const newTimeLeft = calculateTimeLeft();
+      setTimeLeft(newTimeLeft);
+      
+      if (newTimeLeft === 'Expired') {
+        clearInterval(interval);
+      }
+    }, 1000);
+    return () => clearInterval(interval); 
+  }, [isEvent, product?.endingDate , calculateTimeLeft]);
 
   return (
     <div className="w-full h-max min-h-[350px] bg-white relative rounded-lg">
         {isEvent && (
-          <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-semibold px-2 py-1 rounded-sm shadow-md">
-              OFFER
+          <div className="absolute top-2 left-2 bg-red-600 text-yellow-200 text-[13px] font-semibold px-2 py-1 rounded-tl-md rounded-br-md shadow-md">
+              OFFERS
           </div>
         )}
 
@@ -156,7 +160,7 @@ const ProductCard = ({ product, isEvent = false }: Props) => {
               </span>
             </div>
             {isEvent && timeLeft && (
-              <div className="mt-2">
+              <div className="mt-2 mb-4">
                 <span className="inline-block text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-md">
                   {timeLeft}
                 </span>
