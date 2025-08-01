@@ -15,13 +15,13 @@ const TABS = ['Products',"Offers" ,'Reviews'];
 
 const fetchProducts = async()=>{
   const res = await axiosInstance.get('/product/api/get-shop-products');
-  const products = res.data.products?.filter((i:any) => !i.startingDate);
+  const products = res.data.products;
   return products;
 };
 
 const fetchEvents = async()=>{
-  const res = await axiosInstance.get('/product/api/get-shop-products');
-  const products = res.data.products?.filter((i:any) => i.startingDate);
+  const res = await axiosInstance.get('/product/api/get-shop-events');
+  const products = res.data.events;
   return products;
 };
  

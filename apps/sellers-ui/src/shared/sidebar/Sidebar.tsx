@@ -10,11 +10,11 @@ import Link from 'next/link';
 import {  BellPlus, BellRing, CalendarPlus, Home, LayoutDashboard, List, LogOut, Mail, PackageSearch, PlusSquare, Settings, TicketPercent, Wallet } from 'lucide-react';
 import SidebarItem from './Sidebar.item';
 import SidebarMenu from './Sidebar.Menu';
-// import Image from 'next/image';
+
 
 const Sidebar = () => {
   const { activeSidebar, setActiveSidebar } = useSidebar();
-  const { seller } = useSeller();
+  const { seller ,logout, isLoggingOut } = useSeller();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -24,6 +24,11 @@ const Sidebar = () => {
   const getIconColor = (route: string) =>
     activeSidebar === route ? '#0085ff' : '#969696';
 
+  const handleLogout = () => {
+    if (!isLoggingOut) {
+      logout();
+    }
+  };
 
   return (
     <Box
@@ -157,11 +162,11 @@ const Sidebar = () => {
                     }
                   />
                   <SidebarItem
-                    isActive={activeSidebar === '/dashboard/logout'}
-                    title="Logout"
-                    href="/"
+                    title={isLoggingOut ? "Logging out..." : "Logout"}
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
                     icon={
-                      <LogOut fill={getIconColor('/dashboard/logout')} size={26} />
+                      <LogOut color={'#969696'} size={26} />
                     }
                   />
                 </SidebarMenu>               
